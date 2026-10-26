@@ -1,0 +1,18 @@
+{
+  "name": "سامانه مدیریت منابع انسانی",
+  "short_name": "سامانه منابع انسانی",
+  "description": "ثبت، پایش و تحلیل پرسنل پایگاه‌های بهداشت؛ هشدار پیگیری، اعتبارسنجی کدملی، نقشه حرارتی و پشتیبانی کامل آفلاین.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f6f4",
+  "theme_color": "#10234e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

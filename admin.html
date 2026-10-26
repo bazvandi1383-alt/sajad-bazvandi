@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex"/>
+<title>پنل مدیریت | سامانه مدیریت منابع انسانی</title>
+<link rel="icon" type="image/png" href="icons/icon-192.png"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="stylesheet" href="css/fonts.css"/>
+<style>
+:root{
+  --navy:#10234e; --navy-soft:#eef2fb; --brand:#0e8a5f; --brand-soft:#e7f5ee;
+  --bg:#f3f6f4; --panel:#fff; --line:#e2e8e4; --ink:#1e2b26; --soft:#64766e;
+  --new:#2563eb; --new-soft:#e3ecff; --doing:#d97706; --doing-soft:#fdf0dc; --done:#0e8a5f; --done-soft:#e7f5ee;
+  --danger:#c0392b; --danger-soft:#fdeeec;
+  --sky:#0369a1; --sky-soft:#e0f2fe; --amber:#b45309; --amber-soft:#fef3c7;
+  --violet:#7c3aed; --violet-soft:#ede9fe; --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+.hidden{display:none!important}
+.top{background:var(--navy);color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(16,35,78,.25)}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:42px;height:42px;border-radius:12px;background:rgba(126,164,255,.18);border:1px solid rgba(126,164,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px}
+.brand h1{font-size:16px;margin:0;line-height:1.7}
+.brand .sub{font-size:11.5px;color:#9fb4e8}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:inherit;font-size:12.5px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:filter .15s,background .15s}
+.btn:hover{filter:brightness(.97)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.btn.ghost-light{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+/* نام کاربر جاری — چیپ ریز در سربرگ */
+.user-chip{font-size:11px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+.btn.danger{background:#fff;border-color:#f0c4bd;color:var(--danger)}
+.btn.danger:hover{background:var(--danger-soft)}
+.btn.sm{padding:5px 10px;font-size:11.5px}
+.btn.sky{background:var(--sky);border-color:var(--sky);color:#fff}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:#fff}
+.btn.outline{background:#fff}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.wrap{width:100%;max-width:1020px;margin:0 auto;padding:16px 16px 30px;flex:1}
+/* ---------- نوار بخش‌ها ---------- */
+.panel-nav{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:5px;margin-bottom:14px;overflow-x:auto}
+.pnav{font-family:inherit;font-size:12.5px;border:none;background:none;padding:8px 14px;border-radius:10px;cursor:pointer;color:var(--soft);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.pnav:hover{background:var(--bg)}
+.pnav.active{background:var(--navy);color:#fff;font-weight:700}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:15px 16px;box-shadow:0 1px 3px rgba(20,40,30,.04);margin-bottom:14px}
+.card>h2{font-size:14.5px;margin:0 0 4px;display:flex;align-items:center;gap:7px}
+.card>.desc{font-size:12px;color:var(--soft);margin:0 0 13px;line-height:2}
+/* ---------- چیپ‌های آمار ---------- */
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:11px 10px;text-align:center}
+.chip b{display:block;font-size:20px;line-height:1.6}
+.chip span{font-size:11px;color:var(--soft)}
+.chip.st-new b{color:var(--new)} .chip.st-doing b{color:var(--doing)} .chip.st-done b{color:var(--done)}
+/* ---------- نوار ابزار ---------- */
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:flex;gap:5px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:4px;flex-wrap:wrap}
+.tab{font-family:inherit;font-size:12px;border:none;background:none;padding:6px 13px;border-radius:99px;cursor:pointer;color:var(--soft)}
+.tab.active{background:var(--navy);color:#fff;font-weight:700}
+.tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.selbar{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--soft);flex-wrap:wrap}
+.selbar input[type=checkbox]{width:15px;height:15px;accent-color:var(--danger);cursor:pointer}
+.alert{border-radius:10px;padding:10px 13px;font-size:12.5px;margin-bottom:12px}
+.alert.ok{background:var(--brand-soft);border:1px solid #bfe3d2;color:#0b6b49}
+.alert.error{background:var(--danger-soft);border:1px solid #f0c4bd;color:var(--danger)}
+/* ---------- جدول‌ها ---------- */
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:#f8faf9;font-size:11.5px;color:var(--soft);font-weight:700;text-align:right;padding:9px 11px;border-bottom:1px solid var(--line);white-space:nowrap}
+th.c,td.c{text-align:center}
+td{padding:9px 11px;border-bottom:1px solid #eef2ef;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafcfb}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:12px;direction:ltr;display:inline-block}
+/* ---------- بَج‌ها ---------- */
+.badge{font-size:10.5px;font-weight:700;border-radius:99px;padding:3px 10px;white-space:nowrap;display:inline-block}
+.badge.gray{background:#eef1f4;color:#5b6b76}
+.badge.green{background:var(--done-soft);color:var(--done)}
+.badge.blue{background:var(--new-soft);color:var(--new)}
+.badge.red{background:var(--danger-soft);color:var(--danger)}
+.badge.orange{background:var(--doing-soft);color:var(--doing)}
+.badge.violet{background:var(--violet-soft);color:var(--violet)}
+.badge.navy{background:var(--navy-soft);color:var(--navy)}
+.badge.sky{background:var(--sky-soft);color:var(--sky)}
+.badge.amber{background:var(--amber-soft);color:var(--amber)}
+/* ---------- فرم‌ها ---------- */
+label.f{display:block;font-size:12px;font-weight:700;margin:10px 0 4px}
+.inp{width:100%;font-family:inherit;font-size:13px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+.inp:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,138,95,.12);outline:none}
+textarea.inp{resize:vertical;min-height:120px;line-height:2}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.hint{font-size:11px;color:var(--soft);line-height:1.9;margin:5px 0 0}
+/* ---------- چیپ‌های تغییر وضعیت مجوز ---------- */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:430px}
+.mode-chip{font-family:inherit;font-size:12.5px;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:700;color:var(--soft)}
+.mode-chip.on-time{background:var(--sky);border-color:var(--sky);color:#fff}
+.mode-chip.on-count{background:var(--amber);border-color:var(--amber);color:#fff}
+.subbox{border-radius:10px;padding:12px;margin-top:10px}
+.subbox.time{border:1px solid #bae0f5;background:var(--sky-soft)}
+.subbox.count{border:1px solid #f3d89a;background:var(--amber-soft)}
+/* ---------- انتخاب کشویی تاریخ شمسی مجوز ---------- */
+.dt-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.dt-sel{width:auto;min-width:82px;padding:7px 8px;font-size:12.5px;flex:0 1 auto;cursor:pointer}
+.dt-sel.sm{min-width:58px}
+.dt-time{font-size:11px;color:var(--soft);margin:0 2px}
+/* ---------- کارت درخواست ---------- */
+.list{display:flex;flex-direction:column;gap:10px}
+.ticket{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;box-shadow:0 1px 3px rgba(20,40,30,.04);display:flex;gap:10px}
+.ticket.pick{background:#fff5f5;border-color:#f0c4bd}
+.ticket>input[type=checkbox]{width:15px;height:15px;accent-color:var(--danger);cursor:pointer;margin-top:3px;flex:none}
+.t-body{flex:1;min-width:0}
+.t-head{display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap;margin-bottom:6px}
+.t-subj{font-size:13.5px}
+.t-code{font-size:11px;color:var(--soft);background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+.t-msg{margin:0 0 10px;font-size:13px;line-height:2;color:#33453d;white-space:pre-wrap;word-break:break-word}
+.t-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--soft);border-top:1px dashed var(--line);padding-top:9px}
+.t-meta a{color:var(--navy);text-decoration:none;font-weight:700}
+.t-meta a:hover{text-decoration:underline}
+.t-meta .sep{color:#c6d2cb}
+.t-actions{margin-inline-start:auto;display:flex;align-items:center;gap:6px}
+.sel{font-family:inherit;font-size:11.5px;padding:4px 7px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.empty{background:#fff;border:1px dashed var(--line);border-radius:var(--radius);padding:34px 18px;text-align:center;color:var(--soft);font-size:13px;line-height:2.1}
+.note{font-size:11px;color:var(--soft);line-height:2;margin:16px 2px 0;text-align:center}
+.opbtn{font-family:inherit;font-size:11px;padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);white-space:nowrap}
+.opbtn:hover{background:var(--bg)}
+.opbtn.red{color:var(--danger);border-color:#f0c4bd}
+.opbtn.red:hover{background:var(--danger-soft)}
+.opbtn.green{color:var(--brand);border-color:#bfe3d2}
+.opbtn.green:hover{background:var(--brand-soft)}
+.opbtn.violet{color:var(--violet);border-color:#ddd0fa}
+.opbtn.violet:hover{background:var(--violet-soft)}
+@media (max-width:680px){
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .grid2,.grid3{grid-template-columns:1fr}
+  .t-actions{margin-inline-start:0;width:100%}
+  .mode-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">🛡️</span>
+    <div>
+      <h1>پنل مدیریت</h1>
+      <span class="sub">سامانه مدیریت منابع انسانی</span>
+    </div>
+  </div>
+  <div class="top-actions">
+    <a class="btn ghost-light" href="index.html">→ بازگشت به برنامه</a>
+    <span id="userChip" class="user-chip" title="حساب کاربری جاری">👤 …</span>
+    <button id="btnInstall" class="btn ghost-light hidden" title="نصب برنامه روی گوشی یا دسکتاپ (PWA)">📲 نصب برنامه</button>
+    <button id="btnLogout" class="btn ghost-light" title="خروج از حساب">🚪 خروج</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <nav class="panel-nav" id="panelNav">
+    <button class="pnav active" data-tab="req">📥 درخواست‌ها</button>
+    <button class="pnav" data-tab="users">👥 کاربران</button>
+    <button class="pnav" data-tab="lic">🛡️ مجوزها</button>
+    <button class="pnav" data-tab="bulk">➕ ایجاد گروهی</button>
+    <button class="pnav" data-tab="data">🗄️ داده‌ها</button>
+    <button class="pnav" data-tab="cloud">☁️ ابر و پشتیبان</button>
+  </nav>
+
+  <div id="alert" class="alert ok hidden"></div>
+
+  <!-- ══════════ بخش ۱: درخواست‌های پشتیبانی ══════════ -->
+  <section id="tab-req">
+    <div class="chips">
+      <div class="chip"><b id="cAll">۰</b><span>کل درخواست‌ها</span></div>
+      <div class="chip st-new"><b id="cNew">۰</b><span>جدید</span></div>
+      <div class="chip st-doing"><b id="cDoing">۰</b><span>در حال بررسی</span></div>
+      <div class="chip st-done"><b id="cDone">۰</b><span>انجام شده</span></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tabs" id="stTabs">
+        <button class="tab active" data-st="">همه</button>
+        <button class="tab" data-st="new">جدید</button>
+        <button class="tab" data-st="doing">در حال بررسی</button>
+        <button class="tab" data-st="done">انجام شده</button>
+      </div>
+      <div class="tools">
+        <button id="btnExport" class="btn sm">⬇️ خروجی اکسل</button>
+        <button id="btnClear" class="btn sm danger">🗑️ حذف همه</button>
+      </div>
+    </div>
+
+    <div class="selbar" style="margin-bottom:10px" id="reqSelbar">
+      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="reqSelAll"/> انتخاب همه
+      </label>
+      <span id="reqSelCount"></span>
+      <button id="btnReqBulkDel" class="btn sm danger hidden">🗑️ حذف گروهی انتخاب‌شده‌ها</button>
+      <button id="btnReqSelNone" class="btn sm hidden">لغو انتخاب</button>
+    </div>
+
+    <section id="list" class="list"></section>
+    <p id="empty" class="empty hidden">هنوز درخواستی ثبت نشده است.<br/>درخواست‌هایی که از صفحهٔ «📮 درخواست و پشتیبانی» در همین مرورگر ثبت شوند، اینجا نمایش داده می‌شوند.</p>
+  </section>
+
+  <!-- ══════════ بخش ۲: کاربران ══════════ -->
+  <section id="tab-users" class="hidden">
+    <div class="toolbar">
+      <div class="selbar"><b id="usersCount"></b></div>
+      <div class="tools">
+        <button id="btnAddUser" class="btn sm primary">➕ افزودن کاربر جدید</button>
+      </div>
+    </div>
+
+    <div id="userForm" class="card hidden">
+      <h2 id="userFormTitle">➕ افزودن کاربر جدید</h2>
+      <p class="desc">حساب‌های ایجادشده از درگاه ورود خودِ برنامه (بدون ورود دوم) وارد می‌شوند و مجوز اختصاصی‌شان در تب «🛡️ مجوزها» کنترل می‌شود.</p>
+      <div class="grid2">
+        <div>
+          <label class="f" for="ufUsername">نام کاربری <b style="color:var(--danger)">*</b></label>
+          <input id="ufUsername" class="inp" dir="ltr" style="text-align:left" autocomplete="off" placeholder="user1"/>
+          <p class="hint">۳ تا ۳۲ نویسهٔ لاتین/عدد/نقطه/خط تیره — «admin» رزرو شده است.</p>
+        </div>
+        <div>
+          <label class="f" for="ufFullName">نام و نام خانوادگی</label>
+          <input id="ufFullName" class="inp" placeholder="مثال: علی محمدی"/>
+        </div>
+        <div>
+          <label class="f" for="ufPass">گذرواژه <b style="color:var(--danger)">*</b> <span id="ufPassHint" class="hint" style="display:inline"></span></label>
+          <input id="ufPass" class="inp" dir="ltr" style="text-align:left" autocomplete="new-password" placeholder="دست‌کم ۶ نویسه"/>
+        </div>
+        <div>
+          <label class="f" for="ufRole">نقش</label>
+          <select id="ufRole" class="inp">
+            <option value="USER">کاربر عادی</option>
+            <option value="MID_ADMIN">مدیر میانی</option>
+          </select>
+        </div>
+        <div id="ufManagerWrap">
+          <label class="f" for="ufManager">اتصال به گروه مدیر میانی</label>
+          <select id="ufManager" class="inp"><option value="none">— بدون گروه —</option></select>
+          <p class="hint">با اتصال، این کاربر جزو زیرمجموعهٔ آن مدیر میانی قرار می‌گیرد.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button id="btnSaveUser" class="btn primary">💾 ذخیره</button>
+        <button id="btnCancelUser" class="btn">انصراف</button>
+      </div>
+    </div>
+
+    <div id="linkForm" class="card hidden">
+      <h2 id="linkTitle">🔗 اتصال زیرمجموعه</h2>
+      <p class="desc">کاربرانی که تیک می‌خورند به این مدیر میانی متصل می‌شوند و «مدیر گروه» آن‌ها در جدول بالا نمایش داده می‌شود.</p>
+      <div id="linkList" style="display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button id="btnSaveLinks" class="btn primary">💾 ذخیره اتصال‌ها</button>
+        <button id="btnCancelLinks" class="btn">انصراف</button>
+      </div>
+    </div>
+
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th>نام کاربری</th>
+          <th>نام</th>
+          <th class="c">نقش</th>
+          <th class="c">مدیر گروه</th>
+          <th class="c">عملیات</th>
+        </tr></thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+    <p class="note">حساب اصلی «admin» در این فهرست فقط برای نمایش است و قابل ویرایش/حذف نیست؛ افزودن کاربر (تکی و گروهی) فقط از اختیارات حساب اصلی است.</p>
+  </section>
+
+  <!-- ══════════ بخش ۳: مجوزها ══════════ -->
+  <section id="tab-lic" class="hidden">
+    <div class="card">
+      <h2>🛡️ مجوز اختصاصی حساب‌ها</h2>
+      <p class="desc">هر حساب — کاربر عادی یا مدیر میانی — مجوز مستقل خودش را دارد و به سایرین ربطی ندارد. هر دو محدودیت (زمانی و تعدادی) می‌توانند هم‌زمان فعال باشند؛ حساب با اولین نقض (انقضای مهلت یا اتمام سقف) از دسترسی خارج می‌شود. با برداشتن هر محدودیت و ذخیره، آن محدودیت حذف می‌شود.</p>
+
+      <div id="licForm" class="hidden" style="border:2px solid rgba(13,148,136,.4);background:rgba(13,148,136,.05);border-radius:12px;padding:15px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
+          <p style="margin:0;font-size:13px;font-weight:700">شارژ مجوز اختصاصی: <span class="mono" id="licUsername"></span>
+            <span class="badge navy" id="licRoleBadge" style="margin-inline-start:6px"></span>
+          </p>
+          <button id="btnLicClose" class="opbtn" title="بستن">✕</button>
+        </div>
+
+        <div class="mode-grid" style="margin-top:12px">
+          <button type="button" id="chipTime" class="mode-chip">⏰ محدودیت زمانی</button>
+          <button type="button" id="chipCount" class="mode-chip">🔢 محدودیت تعدادی</button>
+        </div>
+
+        <div id="licTimeBox" class="subbox time hidden">
+          <div class="grid2">
+            <div>
+              <label class="f">شروع اعتبار (تاریخ شمسی)</label>
+              <div class="dt-row">
+                <select id="licSYear" class="inp dt-sel" title="سال شمسی" aria-label="سال شروع"></select>
+                <select id="licSMonth" class="inp dt-sel" title="ماه شمسی" aria-label="ماه شروع"></select>
+                <select id="licSDay" class="inp dt-sel sm" title="روز" aria-label="روز شروع"></select>
+                <span class="dt-time">ساعت</span>
+                <select id="licSHour" class="inp dt-sel sm" title="ساعت" aria-label="ساعت شروع"></select>
+                <select id="licSMin" class="inp dt-sel sm" title="دقیقه" aria-label="دقیقه شروع"></select>
+              </div>
+            </div>
+            <div>
+              <label class="f">پایان اعتبار (تاریخ شمسی)</label>
+              <div class="dt-row">
+                <select id="licEYear" class="inp dt-sel" title="سال شمسی" aria-label="سال پایان"></select>
+                <select id="licEMonth" class="inp dt-sel" title="ماه شمسی" aria-label="ماه پایان"></select>
+                <select id="licEDay" class="inp dt-sel sm" title="روز" aria-label="روز پایان"></select>
+                <span class="dt-time">ساعت</span>
+                <select id="licEHour" class="inp dt-sel sm" title="ساعت" aria-label="ساعت پایان"></select>
+                <select id="licEMin" class="inp dt-sel sm" title="دقیقه" aria-label="دقیقه پایان"></select>
+              </div>
+            </div>
+          </div>
+          <p class="hint">سال، ماه و روز به‌صورت کشویی انتخاب می‌شوند؛ طول هر ماه شمسی (۳۱/۳۰/۲۹روزه) به‌صورت خودکار روی روزها اعمال می‌شود.</p>
+          <p class="hint" id="licTimePreview"></p>
+        </div>
+
+        <div id="licCountBox" class="subbox count hidden">
+          <label class="f" for="licLimit">سقف تعداد باز شدن برنامه</label>
+          <input id="licLimit" class="inp" dir="ltr" style="text-align:left;max-width:220px" type="number" min="1" max="100000" placeholder="100"/>
+          <p class="hint">با ذخیره، شمارندهٔ باز شدن صفر می‌شود (شارژ مجدد). در شمارش: هر باز شدن برنامه در نشست تازهٔ مرورگر یک بار شمرده می‌شود (بستن مرورگر و باز کردن دوباره = یک شمارش)؛ رفرش همان نشست شمرده نمی‌شود و ورود دوباره پس از «خروج» نیز یک شمارش جداگانه است. وقتی سقف تمام شود، حساب در همان باز کردن بعدی قفل می‌شود.</p>
+        </div>
+
+        <p class="hint" style="margin-top:12px">حساب اصلی «admin» از هر محدودیتی مستثنی است. قفل دستی جدا از این فرم و فقط با دکمهٔ قفل/رفع قفل جدول تغییر می‌کند.</p>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="btnSaveLic" class="btn primary">💾 ذخیره و شارژ مجدد اعتبار</button>
+          <button id="btnCancelLic" class="btn">انصراف</button>
+        </div>
+      </div>
+
+      <div class="tblwrap" style="margin-top:12px">
+        <table>
+          <thead><tr>
+            <th>کاربر</th>
+            <th class="c">نقش</th>
+            <th class="c">وضعیت مجوز اختصاصی</th>
+            <th class="c">عملیات</th>
+          </tr></thead>
+          <tbody id="licBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ بخش ۴: ایجاد گروهی ══════════ -->
+  <section id="tab-bulk" class="hidden">
+    <div class="card">
+      <h2>➕ ایجاد گروهی کاربران</h2>
+      <p class="desc">کاربران را یک‌جا بسازید — از متن یا فایل اکسل. فایل انتخاب‌شده بر متن اولویت دارد. ستون‌های اکسل با عنوان «نام کاربری / username»، «رمز / گذرواژه / password» و «نام و نام خانوادگی / fullName» شناسایی می‌شوند (بدون سرستون هم پذیرفته می‌شود: ستون ۱=نام کاربری، ۲=رمز، ۳=نام).</p>
+
+      <label class="f" for="bulkText">متن کاربران — هر خط: نام‌کاربری , رمز , نام‌ونام‌خانوادگی</label>
+      <textarea id="bulkText" class="inp" dir="ltr" style="text-align:left" placeholder="user1,123456,علی محمدی&#10;user2,123456,زهرا احمدی"></textarea>
+
+      <div class="grid2" style="margin-top:12px">
+        <div>
+          <label class="f" for="bulkFile">یا فایل اکسل (xlsx / xls)</label>
+          <input id="bulkFile" class="inp" type="file" accept=".xlsx,.xls" dir="ltr" style="text-align:left;padding:6px"/>
+          <p class="hint" id="bulkFileInfo"></p>
+        </div>
+        <div>
+          <label class="f" for="bulkManager">اتصال همهٔ کاربران جدید به گروه مدیر میانی</label>
+          <select id="bulkManager" class="inp"><option value="none">— بدون گروه —</option></select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+        <button id="btnBulkGo" class="btn primary">⚡ ایجاد گروهی</button>
+        <button id="btnBulkTpl" class="btn">📄 دانلود قالب اکسل</button>
+      </div>
+
+      <div id="bulkResult" class="hidden" style="margin-top:14px;border-radius:10px;border:1px solid #bfe3d2;background:var(--brand-soft);padding:13px">
+        <b id="bulkResultTitle" style="font-size:13px"></b>
+        <div id="bulkFailWrap" class="hidden" style="margin-top:10px">
+          <b style="font-size:12px;color:var(--danger)">سطرهای ناموفق:</b>
+          <div class="tblwrap" style="margin-top:6px">
+            <table>
+              <thead><tr><th class="c">سطر</th><th>نام کاربری</th><th>خطا</th></tr></thead>
+              <tbody id="bulkFailBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ بخش ۵: داده‌ها ══════════ -->
+  <section id="tab-data" class="hidden">
+    <div class="toolbar">
+      <div class="selbar"><b id="dataCount"></b></div>
+      <div class="tools">
+        <button id="btnDataExport" class="btn sm">⬇️ خروجی اکسل</button>
+        <button id="btnDataBulkDel" class="btn sm danger hidden">🗑️ حذف گروهی انتخاب‌شده‌ها</button>
+      </div>
+    </div>
+    <div class="selbar" style="margin-bottom:10px">
+      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+        <input type="checkbox" id="dataSelAll"/> انتخاب همه
+      </label>
+      <button id="btnDataSelNone" class="btn sm hidden">لغو انتخاب</button>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <thead><tr>
+          <th class="c" style="width:34px"></th>
+          <th>نام فایل</th>
+          <th>شیت</th>
+          <th>بیماری</th>
+          <th class="c">ردیف</th>
+          <th class="c">معتبر</th>
+          <th class="c">نامعتبر</th>
+          <th class="c">تاریخ ثبت</th>
+          <th class="c">عملیات</th>
+        </tr></thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+    </div>
+    <p id="dataEmpty" class="empty hidden">هنوز داده‌ای ثبت نشده است.<br/>هر فایل اکسلی که در برنامه بارگذاری شود، به‌صورت خودکار در این فهرست ثبت می‌گردد.</p>
+    <p class="note">فهرست داده‌ها فقط در حافظهٔ همین مرورگر نگهداری می‌شود و برای گزارش مدیریتی از آپلودهای انجام‌شده است.</p>
+  </section>
+
+  <!-- ══════════ بخش ۶: ابر و پشتیبان (فقط حساب اصلی) ══════════ -->
+  <section id="tab-cloud" class="hidden">
+    <div class="card">
+      <b>☁️ همگام‌سازی ابری (اختیاری)</b>
+      <p class="hint">با یک بار راه‌اندازی رایگان روی Cloudflare (دیتابیس D1 + Worker)، همهٔ حساب‌ها، مجوزها، درخواست‌ها و داده‌ها روی سرور ذخیره می‌شود و روی همهٔ دستگاه‌ها یکسان دیده می‌شود — تا زمانی که شما ویرایش/حذف نکنید از بین نمی‌رود. راهنمای گام‌به‌گام: فایل «راهنمای_همگام‌سازی_ابری_Cloudflare.md».
+      تا قبل از راه‌اندازی، «پشتیبان‌گیری کامل» در پایین همین صفحه از دست رفتن داده جلوگیری می‌کند.</p>
+      <div class="grid2">
+        <div>
+          <label class="f">نشانی سرور (Worker URL)</label>
+          <input id="cloudBase" class="inp" dir="ltr" placeholder="https://nema-api.your-name.workers.dev" autocomplete="off" spellcheck="false"/>
+        </div>
+        <div>
+          <label class="f">کد اشتراک (کلید خواندن — روی دستگاه همهٔ کاربران)</label>
+          <input id="cloudReadKey" class="inp" dir="ltr" autocomplete="off" spellcheck="false"/>
+        </div>
+      </div>
+      <label class="f">کلید مدیر (کلید نوشتن — فقط روی دستگاه شما می‌ماند)</label>
+      <input id="cloudAdminKey" class="inp" dir="ltr" autocomplete="off" spellcheck="false"/>
+      <div class="toolbar" style="margin-top:10px">
+        <div class="tools">
+          <button id="btnCloudSave" class="btn sm primary">💾 ذخیرهٔ تنظیمات</button>
+          <button id="btnCloudPull" class="btn sm">⬇️ بارگیری از ابر</button>
+          <button id="btnCloudPush" class="btn sm">⬆️ ارسال به ابر</button>
+          <button id="btnCloudForce" class="btn sm danger hidden">⚠️ ارسال اجباری (بازنویسی سرور)</button>
+          <button id="btnCloudOff" class="btn sm danger">قطع اتصال ابر</button>
+        </div>
+      </div>
+      <p id="cloudStatus" class="hint" style="margin-top:8px"></p>
+    </div>
+
+    <div class="card">
+      <b>🧰 پشتیبان‌گیری کامل (بدون نیاز به اینترنت)</b>
+      <p class="hint">همهٔ داده‌های همین مرورگر — کاربران، مجوزها، زیرمجموعه‌ها، داده‌ها، درخواست‌ها، نقاط اکسل و تنظیمات — در یک فایل ذخیره می‌شود. برای انتقال به دستگاه/مرورگر دیگر، فایل را همان‌جا «بازیابی» کنید.</p>
+      <div class="toolbar" style="margin-top:10px">
+        <div class="tools">
+          <button id="btnBackupExport" class="btn sm primary">📥 دریافت فایل پشتیبان</button>
+          <button id="btnBackupImport" class="btn sm">📤 بازیابی از فایل</button>
+          <input type="file" id="backupFile" accept=".json,application/json" hidden/>
+        </div>
+      </div>
+      <p id="backupStatus" class="hint" style="margin-top:8px"></p>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/cloud.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/registry.js"></script>
+<script src="js/jdate.js"></script>
+<script src="lib/xlsx.full.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- محافظت: فقط با نشست معتبر برنامه (بدون ورود دوم) ---------- */
+  if (!window.Auth || !window.Auth.isAuthenticated()) {
+    location.replace('index.html');
+    return;
+  }
+  if (!window.Registry) { alert('خطای بارگذاری ماژول registry.js'); return; }
+
+  /* ---------- حساب جاری و محدودسازی بخش‌های مدیریتی ----------
+     بخش‌های «کاربران»، «مجوزها» و «ایجاد گروهی» فقط و فقط برای حساب اصلی (admin)
+     وجود دارند؛ در سایر حساب‌ها (کاربر عادی و مدیر میانی) از DOM حذف می‌شوند. */
+  var primary = !!(window.Auth.isPrimary && window.Auth.isPrimary());
+  (function fillUserChip() {
+    var uc = document.getElementById('userChip');
+    if (!uc) return;
+    var su = window.Auth.sessionUser ? window.Auth.sessionUser() : null;
+    uc.textContent = '👤 ' + (su || '—');
+    uc.title = 'حساب کاربری جاری' + (su ? ': ' + su : '');
+  })();
+  if (!primary) {
+    ['users', 'lic', 'bulk', 'cloud'].forEach(function (t) {
+      var b = document.querySelector('.pnav[data-tab="' + t + '"]');
+      if (b && b.parentNode) b.parentNode.removeChild(b);
+      var s = document.getElementById('tab-' + t);
+      if (s && s.parentNode) s.parentNode.removeChild(s);
+    });
+    /* دکمهٔ «نصب برنامه» هم فقط برای حساب اصلی است — در سایر حساب‌ها کلاً از DOM حذف می‌شود */
+    var bi = document.getElementById('btnInstall');
+    if (bi && bi.parentNode) bi.parentNode.removeChild(bi);
+  }
+
+  var R = window.Registry, JD = window.JDate, XLSXg = window.XLSX;
+  var $ = function (id) { return document.getElementById(id); };
+  var LS_KEY = 'nema.support.tickets.v1';
+  var ST_LABEL = { new: 'جدید', doing: 'در حال بررسی', done: 'انجام شده' };
+
+  /* ---------- ابزارهای مشترک ---------- */
+  function faNum(s) { return String(s).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[Number(d)]; }); }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function faDate(ts) {
+    try { return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(ts)); }
+    catch (e) { return faNum(new Date(ts).toLocaleString()); }
+  }
+  function showAlert(msg, kind) {
+    var a = $('alert');
+    a.textContent = msg;
+    a.className = 'alert ' + (kind || 'ok');
+    clearTimeout(showAlert._t);
+    showAlert._t = setTimeout(function () { a.className = 'alert ok hidden'; }, 3800);
+  }
+
+  /* ---------- تاریخ/ساعت شمسی برای مجوز (انتخاب کشویی) ---------- */
+  var JMONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+  function fmtJDT(ts) { /* timestamp → «۱۴۰۴/۰۷/۱۹ ۱۰:۳۰» */
+    if (!ts) return '—';
+    var d = new Date(ts);
+    var j = JD.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    var p2 = function (n) { return n < 10 ? '۰' + faNum(n) : faNum(n); };
+    return faNum(j.jy) + '/' + p2(j.jm) + '/' + p2(j.jd) + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
+  }
+  function remainText(ms) { /* «۳ روز و ۴ ساعت» */
+    if (ms <= 0) return 'منقضی';
+    var min = Math.floor(ms / 60000), d = Math.floor(min / 1440), h = Math.floor((min % 1440) / 60), m = min % 60;
+    if (d > 0) return faNum(d) + ' روز و ' + faNum(h) + ' ساعت';
+    if (h > 0) return faNum(h) + ' ساعت و ' + faNum(m) + ' دقیقه';
+    return faNum(m) + ' دقیقه';
+  }
+
+  /* ---------- انتخاب کشویی سال/ماه/روز شمسی (شروع و پایان اعتبار) ---------- */
+  var DT = {
+    s: { y: 'licSYear', m: 'licSMonth', d: 'licSDay', h: 'licSHour', i: 'licSMin' },
+    e: { y: 'licEYear', m: 'licEMonth', d: 'licEDay', h: 'licEHour', i: 'licEMin' }
+  };
+  function fillYearOptions(sel) {
+    var tj = JD.todayJalali(), html = '';
+    for (var y = tj.jy - 2; y <= tj.jy + 10; y++) html += '<option value="' + y + '">' + faNum(y) + '</option>';
+    sel.innerHTML = html;
+  }
+  function fillMonthOptions(sel) {
+    sel.innerHTML = JMONTHS.map(function (name, idx) {
+      return '<option value="' + (idx + 1) + '">' + name + '</option>';
+    }).join('');
+  }
+  function fillDayOptions(jy, jm, sel, keep) {
+    var len = JD.jalaaliMonthLength(jy, jm) || 31, html = '';
+    for (var d = 1; d <= len; d++) html += '<option value="' + d + '">' + faNum(d) + '</option>';
+    sel.innerHTML = html;
+    if (keep) sel.value = String(Math.min(keep, len));
+  }
+  function initDateSelects() {
+    var hh = '', mm = '', h, m;
+    for (h = 0; h < 24; h++) hh += '<option value="' + h + '">' + faNum((h < 10 ? '0' : '') + h) + '</option>';
+    for (m = 0; m < 60; m++) mm += '<option value="' + m + '">' + faNum((m < 10 ? '0' : '') + m) + '</option>';
+    ['s', 'e'].forEach(function (p) {
+      fillYearOptions($(DT[p].y));
+      fillMonthOptions($(DT[p].m));
+      $(DT[p].h).innerHTML = hh;
+      $(DT[p].i).innerHTML = mm;
+    });
+  }
+  function updateDays(prefix) {
+    var jy = Number($(DT[prefix].y).value), jm = Number($(DT[prefix].m).value);
+    var keep = Number($(DT[prefix].d).value) || 1;
+    fillDayOptions(jy, jm, $(DT[prefix].d), keep);
+  }
+  function setDT(prefix, ts) {
+    var d = new Date(ts);
+    var j = JD.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    $(DT[prefix].y).value = String(j.jy);
+    $(DT[prefix].m).value = String(j.jm);
+    updateDays(prefix);
+    $(DT[prefix].d).value = String(j.jd);
+    $(DT[prefix].h).value = String(d.getHours());
+    $(DT[prefix].i).value = String(d.getMinutes());
+  }
+  function tsFrom(prefix) {
+    var jy = Number($(DT[prefix].y).value), jm = Number($(DT[prefix].m).value), jd = Number($(DT[prefix].d).value);
+    if (!jy || !jm || !jd) return null;
+    if (!JD.isValidJalaaliDate(jy, jm, jd)) return null;
+    var g = JD.toGregorian(jy, jm, jd);
+    var hh = Number($(DT[prefix].h).value) || 0, mi = Number($(DT[prefix].i).value) || 0;
+    return new Date(g.gy, g.gm - 1, g.gd, hh, mi, 0).getTime();
+  }
+  function defaultStartTS() { var t = new Date(); t.setHours(0, 0, 0, 0); return t.getTime(); }
+  function defaultEndTS() {
+    var tj = JD.todayJalali();
+    var g = JD.toGregorian(tj.jy + 1, tj.jm, tj.jd);
+    return new Date(g.gy, g.gm - 1, g.gd, 23, 59, 0).getTime();
+  }
+
+  /* ---------- سوئیچ بخش‌ها ---------- */
+  $('panelNav').addEventListener('click', function (e) {
+    var b = e.target.closest('.pnav');
+    if (!b) return;
+    this.querySelectorAll('.pnav').forEach(function (x) { x.classList.toggle('active', x === b); });
+    ['req', 'users', 'lic', 'bulk', 'data', 'cloud'].forEach(function (t) {
+      var el = $('tab-' + t);
+      if (el) el.classList.toggle('hidden', t !== b.dataset.tab);
+    });
+  });
+
+  /* ══════════════ بخش ۱: درخواست‌ها ══════════════ */
+  var tickets = [], reqFilter = '', reqSel = {};
+
+  function loadTickets() {
+    try { tickets = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
+    catch (e) { tickets = []; }
+    if (!Array.isArray(tickets)) tickets = [];
+    tickets.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+  }
+  function saveTickets() {
+    var saved = false;
+    try { localStorage.setItem(LS_KEY, JSON.stringify(tickets)); NemaCloud.markDirty(); saved = true; }
+    catch (e) { showAlert('ذخیره‌سازی ممکن نشد (حافظهٔ مرورگر پر یا مسدود است).', 'error'); }
+    if (saved && window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+  }
+  function reqSelIds() { return Object.keys(reqSel).filter(function (k) { return reqSel[k]; }); }
+
+  function renderRequests() {
+    var shown = tickets.filter(function (t) { return !reqFilter || t.status === reqFilter; });
+    $('list').innerHTML = shown.map(function (t) {
+      var phone = String(t.phone || '');
+      var picked = !!reqSel[String(t.id)];
+      return '<article class="ticket' + (picked ? ' pick' : '') + '">' +
+        '<input type="checkbox" data-pick="' + esc(t.id) + '" ' + (picked ? 'checked' : '') + ' title="انتخاب"/>' +
+        '<div class="t-body">' +
+          '<div class="t-head">' +
+            '<b class="t-subj">' + esc(t.subject || 'بدون موضوع') + '</b>' +
+            '<span class="t-code">#' + esc(t.code || '') + '</span>' +
+            '<span class="badge st-' + esc(t.status) + '">' + (ST_LABEL[t.status] || esc(t.status)) + '</span>' +
+          '</div>' +
+          '<p class="t-msg">' + esc(t.message || '') + '</p>' +
+          '<div class="t-meta">' +
+            '<span>👤 ' + esc(t.name || '—') + '</span>' +
+            (t.sender ? '<span class="sep">|</span><span>ارسال‌کننده: ' + esc(t.sender) + '</span>' : '') +
+            '<span class="sep">|</span>' +
+            (phone ? '<a dir="ltr" href="tel:' + esc(phone) + '">📞 ' + esc(phone) + '</a>' : '<span>📞 —</span>') +
+            '<span class="sep">|</span>' +
+            '<span>🗓 ' + esc(faDate(t.ts || Date.now())) + '</span>' +
+            '<div class="t-actions">' +
+              '<select class="sel" data-st-id="' + esc(t.id) + '" title="تغییر وضعیت">' +
+                ['new', 'doing', 'done'].map(function (s) {
+                  return '<option value="' + s + '"' + (t.status === s ? ' selected' : '') + '>' + ST_LABEL[s] + '</option>';
+                }).join('') +
+              '</select>' +
+              '<button class="btn sm danger" data-del="' + esc(t.id) + '">حذف</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    $('empty').className = 'empty' + (shown.length ? ' hidden' : '');
+    var counts = { all: tickets.length, 'new': 0, doing: 0, done: 0 };
+    tickets.forEach(function (t) { if (counts[t.status] != null) counts[t.status]++; });
+    $('cAll').textContent = faNum(counts.all);
+    $('cNew').textContent = faNum(counts['new']);
+    $('cDoing').textContent = faNum(counts.doing);
+    $('cDone').textContent = faNum(counts.done);
+
+    var ids = reqSelIds();
+    $('reqSelCount').textContent = ids.length ? faNum(ids.length) + ' مورد انتخاب شده' : '';
+    $('btnReqBulkDel').classList.toggle('hidden', !ids.length);
+    $('btnReqSelNone').classList.toggle('hidden', !ids.length);
+    $('reqSelAll').checked = shown.length > 0 && ids.length === shown.length;
+  }
+
+  $('stTabs').addEventListener('click', function (e) {
+    var b = e.target.closest('.tab');
+    if (!b) return;
+    reqFilter = b.dataset.st || '';
+    this.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('active', x === b); });
+    renderRequests();
+  });
+
+  $('list').addEventListener('change', function (e) {
+    var pick = e.target.closest('[data-pick]');
+    if (pick) { reqSel[pick.dataset.pick] = pick.checked; renderRequests(); return; }
+    var sel = e.target.closest('[data-st-id]');
+    if (sel) {
+      var t = tickets.find(function (x) { return String(x.id) === sel.dataset.stId; });
+      if (t) { t.status = sel.value; saveTickets(); renderRequests(); showAlert('وضعیت درخواست #' + t.code + ' به «' + ST_LABEL[t.status] + '» تغییر کرد.'); }
+    }
+  });
+
+  $('list').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-del]');
+    if (!btn) return;
+    var id = btn.dataset.del;
+    var t = tickets.find(function (x) { return String(x.id) === id; });
+    if (!t) return;
+    if (!window.confirm('درخواست #' + t.code + ' («' + (t.subject || 'بدون موضوع') + '») حذف شود؟')) return;
+    tickets = tickets.filter(function (x) { return String(x.id) !== id; });
+    delete reqSel[id];
+    saveTickets(); renderRequests();
+    showAlert('درخواست #' + t.code + ' حذف شد.');
+  });
+
+  $('reqSelAll').addEventListener('change', function () {
+    var shown = tickets.filter(function (t) { return !reqFilter || t.status === reqFilter; });
+    var self = this;
+    shown.forEach(function (t) { reqSel[String(t.id)] = self.checked; });
+    renderRequests();
+  });
+  $('btnReqSelNone').addEventListener('click', function () { reqSel = {}; renderRequests(); });
+  $('btnReqBulkDel').addEventListener('click', function () {
+    var ids = reqSelIds();
+    if (!ids.length) return;
+    if (!window.confirm('حذف گروهی ' + faNum(ids.length) + ' درخواست انتخاب‌شده؟ این عمل بازگشت‌پذیر نیست.')) return;
+    tickets = tickets.filter(function (t) { return ids.indexOf(String(t.id)) === -1; });
+    reqSel = {};
+    saveTickets(); renderRequests();
+    showAlert('درخواست‌های انتخاب‌شده حذف شدند.');
+  });
+
+  $('btnClear').addEventListener('click', function () {
+    if (!tickets.length) { showAlert('درخواستی برای حذف وجود ندارد.', 'error'); return; }
+    if (!window.confirm('همهٔ ' + faNum(tickets.length) + ' درخواست برای همیشه حذف شود؟')) return;
+    tickets = []; reqSel = {};
+    saveTickets(); renderRequests();
+    showAlert('همهٔ درخواست‌ها حذف شد.');
+  });
+
+  $('btnExport').addEventListener('click', function () {
+    if (!tickets.length) { showAlert('درخواستی برای خروجی وجود ندارد.', 'error'); return; }
+    try {
+      var rows = tickets.map(function (t) {
+        return { 'کد پیگیری': t.code, 'تاریخ': faDate(t.ts || Date.now()), 'نام': t.name || '',
+                 'شماره تماس': t.phone || '', 'موضوع': t.subject || '', 'شرح': t.message || '',
+                 'وضعیت': ST_LABEL[t.status] || t.status };
+      });
+      var ws = XLSXg.utils.json_to_sheet(rows);
+      var wb = XLSXg.utils.book_new();
+      XLSXg.utils.book_append_sheet(wb, ws, 'درخواست‌ها');
+      XLSXg.writeFile(wb, 'support-requests-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+    } catch (e) { showAlert('ساخت فایل اکسل ممکن نشد.', 'error'); }
+  });
+
+  /* ══════════════ بخش‌های ۲ تا ۴ (کاربران / مجوزها / ایجاد گروهی) — فقط حساب اصلی ══════════════ */
+  if (primary) {
+
+  /* ══════════════ بخش ۲: کاربران ══════════════ */
+  var editingUserId = null, linkingMidId = null;
+
+  function roleBadge(role) {
+    if (role === 'MID_ADMIN') return '<span class="badge violet">مدیر میانی</span>';
+    if (role === 'ADMIN') return '<span class="badge green">مدیر</span>';
+    return '<span class="badge gray">کاربر</span>';
+  }
+  function managerName(u) {
+    if (u.role === 'MID_ADMIN') {
+      var n = R.linksOf(u.id).length;
+      return n ? '<span style="color:var(--violet);font-weight:700">' + faNum(n) + ' نفر متصل</span>' : 'بدون زیرمجموعه';
+    }
+    if (!u.managerId) return '—';
+    var m = R.users().filter(function (x) { return x.id === u.managerId; })[0];
+    return m ? esc(m.fullName || m.username) : '—';
+  }
+
+  function renderUsers() {
+    var us = R.users();
+    var mids = us.filter(function (x) { return x.role === 'MID_ADMIN'; });
+    /* پر کردن انتخاب‌گر گروه (فرم افزودن/ویرایش و گروهی) */
+    ['ufManager', 'bulkManager'].forEach(function (id) {
+      var s = $(id), keep = s.value;
+      s.innerHTML = '<option value="none">— بدون گروه —</option>' + mids.map(function (m) {
+        return '<option value="' + esc(m.id) + '">' + esc(m.fullName || m.username) + ' (' + esc(m.username) + ')</option>';
+      }).join('');
+      if (keep) s.value = keep;
+    });
+
+    var rows = ['<tr>' +
+        '<td><span class="mono">admin</span> <span class="badge green">حساب اصلی</span></td>' +
+        '<td>مدیر سامانه</td><td class="c">' + roleBadge('ADMIN') + '</td>' +
+        '<td class="c">—</td><td class="c"><span class="hint">(شما)</span></td>' +
+      '</tr>'];
+    rows = rows.concat(us.map(function (u) {
+      return '<tr>' +
+        '<td><span class="mono">' + esc(u.username) + '</span></td>' +
+        '<td>' + esc(u.fullName || '—') + '</td>' +
+        '<td class="c">' + roleBadge(u.role) + '</td>' +
+        '<td class="c">' + managerName(u) + '</td>' +
+        '<td class="c">' +
+          '<button class="opbtn" data-edit="' + esc(u.id) + '">✏️ ویرایش</button> ' +
+          (u.role === 'MID_ADMIN' ? '<button class="opbtn violet" data-link="' + esc(u.id) + '">🔗 اتصال</button> ' : '') +
+          '<button class="opbtn red" data-delu="' + esc(u.id) + '">🗑 حذف</button>' +
+        '</td>' +
+      '</tr>';
+    }));
+    $('usersBody').innerHTML = rows.join('');
+    $('usersCount').textContent = 'کاربران سامانه: ' + faNum(us.length) + ' نفر (به‌علاوهٔ حساب اصلی)';
+  }
+
+  function openUserForm(edit) {
+    editingUserId = edit ? edit.id : null;
+    $('userFormTitle').textContent = edit ? '✏️ ویرایش کاربر: ' + edit.username : '➕ افزودن کاربر جدید';
+    $('ufUsername').value = edit ? edit.username : '';
+    $('ufUsername').disabled = !!edit;
+    $('ufFullName').value = edit ? (edit.fullName || '') : '';
+    $('ufPass').value = '';
+    $('ufPassHint').textContent = edit ? '(خالی = بدون تغییر)' : '';
+    $('ufRole').value = edit ? edit.role : 'USER';
+    $('ufManager').value = (edit && edit.managerId) ? edit.managerId : 'none';
+    $('ufManagerWrap').style.display = ($('ufRole').value === 'USER') ? '' : 'none';
+    $('userForm').classList.remove('hidden');
+    $('linkForm').classList.add('hidden');
+    $('ufUsername').focus();
+  }
+  function closeUserForm() { $('userForm').classList.add('hidden'); editingUserId = null; }
+
+  $('btnAddUser').addEventListener('click', function () { openUserForm(null); });
+  $('btnCancelUser').addEventListener('click', closeUserForm);
+  $('ufRole').addEventListener('change', function () {
+    $('ufManagerWrap').style.display = (this.value === 'USER') ? '' : 'none';
+  });
+
+  $('btnSaveUser').addEventListener('click', function () {
+    var pass = $('ufPass').value;
+    if (editingUserId) {
+      var patch = {
+        fullName: $('ufFullName').value,
+        role: $('ufRole').value,
+        managerId: $('ufRole').value === 'USER' ? $('ufManager').value : null
+      };
+      if (pass) patch.pass = pass;
+      var res = R.updateUser(editingUserId, patch);
+      if (!res.ok) { showAlert(res.error, 'error'); return; }
+      showAlert('کاربر «' + res.user.username + '» به‌روزرسانی شد.');
+    } else {
+      var res2 = R.addUser({
+        username: $('ufUsername').value,
+        fullName: $('ufFullName').value,
+        pass: pass,
+        role: $('ufRole').value,
+        managerId: $('ufManager').value
+      });
+      if (!res2.ok) { showAlert(res2.error, 'error'); return; }
+      showAlert('کاربر «' + res2.user.username + '» ایجاد شد — از همین درگاه ورود برنامه وارد می‌شود.');
+    }
+    closeUserForm(); renderUsers(); renderLicenses();
+    if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();   /* انتشار فوری تغییر در ابر */
+  });
+
+  $('usersBody').addEventListener('click', function (e) {
+    var be = e.target.closest('[data-edit]');
+    if (be) {
+      var u = R.users().filter(function (x) { return x.id === be.dataset.edit; })[0];
+      if (u) openUserForm(u);
+      return;
+    }
+    var bl = e.target.closest('[data-link]');
+    if (bl) { openLinkForm(bl.dataset.link); return; }
+    var bd = e.target.closest('[data-delu]');
+    if (bd) {
+      var d = R.users().filter(function (x) { return x.id === bd.dataset.delu; })[0];
+      if (!d) return;
+      var extra = d.role === 'MID_ADMIN' ? ' همهٔ اتصال‌های زیرمجموعهٔ او هم قطع می‌شود و' : '';
+      if (!window.confirm('کاربر «' + d.username + '» حذف شود؟' + extra + ' مجوز اختصاصی‌اش نیز پاک می‌شود.')) return;
+      R.removeUser(d.id);
+      if (editingUserId === d.id) closeUserForm();
+      renderUsers(); renderLicenses();
+      if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+      showAlert('کاربر «' + d.username + '» حذف شد.');
+    }
+  });
+
+  /* اتصال زیرمجموعه به مدیر میانی */
+  function openLinkForm(midId) {
+    var mid = R.users().filter(function (x) { return x.id === midId; })[0];
+    if (!mid) return;
+    linkingMidId = midId;
+    $('linkTitle').textContent = '🔗 اتصال زیرمجموعه به «' + (mid.fullName || mid.username) + '»';
+    var linked = R.linksOf(midId);
+    var cands = R.users().filter(function (x) { return x.id !== midId; });
+    $('linkList').innerHTML = cands.length ? cands.map(function (u) {
+      return '<label style="display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;cursor:pointer;font-size:12.5px">' +
+        '<input type="checkbox" value="' + esc(u.id) + '" ' + (linked.indexOf(u.id) !== -1 ? 'checked' : '') + '/>' +
+        '<span class="mono">' + esc(u.username) + '</span>' +
+        '<span>' + esc(u.fullName || '') + '</span>' + roleBadge(u.role) + '</label>';
+    }).join('') : '<p class="hint">کاربری برای اتصال وجود ندارد — اول از «افزودن کاربر جدید» حساب بسازید.</p>';
+    $('userForm').classList.add('hidden');
+    $('linkForm').classList.remove('hidden');
+  }
+  $('btnCancelLinks').addEventListener('click', function () { $('linkForm').classList.add('hidden'); linkingMidId = null; });
+  $('btnSaveLinks').addEventListener('click', function () {
+    var ids = [];
+    $('linkList').querySelectorAll('input[type=checkbox]:checked').forEach(function (c) { ids.push(c.value); });
+    R.setLinks(linkingMidId, ids);
+    $('linkForm').classList.add('hidden');
+    linkingMidId = null;
+    renderUsers();
+    if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+    showAlert('اتصال‌های زیرمجموعه ذخیره شد.');
+  });
+
+  /* ══════════════ بخش ۳: مجوزها ══════════════ */
+  var licTargetId = null;
+
+  function licStatusCell(u) {
+    if (u.username === 'admin' && !u.id) return '<span class="badge navy">حساب اصلی — بدون محدودیت</span>';
+    var st = R.licenseStatus(u.id), l = st.license, det = [];
+    if (st.kind === 'locked') return '<span class="badge red">🔒 قفل دستی</span>';
+    if (st.kind === 'expired') return '<span class="badge red">مهلت اعتبار تمام شده</span>';
+    if (st.kind === 'notstarted') return '<span class="badge orange">اعتبار هنوز شروع نشده</span>';
+    if (st.kind === 'exhausted') return '<span class="badge red">سقف باز شدن تمام شده</span>';
+    if (st.kind === 'none') return '<span class="badge gray">بدون محدودیت</span>';
+    if (l.useTime && l.expiryAt) det.push('تا ' + fmtJDT(l.expiryAt) + ' (' + remainText(l.expiryAt - Date.now()) + ')');
+    if (l.useCount && l.openLimit) det.push(faNum(Math.max(0, l.openLimit - (l.openCount || 0))) + ' باز کردن باقی‌مانده');
+    return '<span class="badge green">فعال</span> <span class="hint" style="display:inline">' + det.join(' · ') + '</span>';
+  }
+
+  function renderLicenses() {
+    var us = R.users();
+    var rows = ['<tr>' +
+        '<td><span class="mono">admin</span> <span class="badge green">حساب اصلی</span></td>' +
+        '<td class="c">' + roleBadge('ADMIN') + '</td>' +
+        '<td class="c"><span class="badge navy">حساب اصلی — بدون محدودیت</span></td>' +
+        '<td class="c">—</td></tr>'];
+    rows = rows.concat(us.map(function (u) {
+      var locked = R.licenseOf(u.id).manualLock;
+      return '<tr>' +
+        '<td><span class="mono">' + esc(u.username) + '</span>' + (u.fullName ? '<br/><span class="hint">' + esc(u.fullName) + '</span>' : '') + '</td>' +
+        '<td class="c">' + roleBadge(u.role) + '</td>' +
+        '<td class="c">' + licStatusCell(u) + '</td>' +
+        '<td class="c">' +
+          '<button class="opbtn green" data-charge="' + esc(u.id) + '">🛡️ شارژ مجوز</button> ' +
+          '<button class="opbtn' + (locked ? ' green' : ' red') + '" data-lock="' + esc(u.id) + '">' + (locked ? '🔓 رفع قفل' : '🔒 قفل دستی') + '</button>' +
+        '</td></tr>';
+    }));
+    $('licBody').innerHTML = rows.join('');
+    if (licTargetId) {
+      var still = us.filter(function (x) { return x.id === licTargetId; })[0];
+      if (!still) closeLicForm();
+    }
+  }
+
+  function openLicForm(u) {
+    licTargetId = u.id;
+    $('licUsername').textContent = u.username;
+    $('licRoleBadge').textContent = (u.role === 'MID_ADMIN' ? 'مدیر میانی' : 'کاربر');
+    var l = R.licenseOf(u.id);
+    $('chipTime').classList.toggle('on-time', !!l.useTime);
+    $('chipCount').classList.toggle('on-count', !!l.useCount);
+    $('licTimeBox').classList.toggle('hidden', !l.useTime);
+    $('licCountBox').classList.toggle('hidden', !l.useCount);
+    if (l.startAt) setDT('s', l.startAt); else setDT('s', defaultStartTS());
+    if (l.expiryAt) setDT('e', l.expiryAt); else setDT('e', defaultEndTS());
+    $('licLimit').value = l.useCount ? (l.openLimit || '') : '';
+    timePreview();
+    $('licForm').classList.remove('hidden');
+    $('licForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  function closeLicForm() { $('licForm').classList.add('hidden'); licTargetId = null; }
+
+  $('btnLicClose').addEventListener('click', closeLicForm);
+  $('btnCancelLic').addEventListener('click', closeLicForm);
+  $('chipTime').addEventListener('click', function () {
+    var on = this.classList.toggle('on-time');
+    $('licTimeBox').classList.toggle('hidden', !on);
+  });
+  $('chipCount').addEventListener('click', function () {
+    var on = this.classList.toggle('on-count');
+    $('licCountBox').classList.toggle('hidden', !on);
+  });
+  function timePreview() {
+    var s = tsFrom('s'), e = tsFrom('e');
+    if (s == null || e == null) { $('licTimePreview').textContent = ''; return; }
+    $('licTimePreview').textContent = '✅ از ' + fmtJDT(s) + ' تا ' + fmtJDT(e) + ' — مدت: ' + remainText(e - s);
+  }
+  ['s', 'e'].forEach(function (p) {
+    $(DT[p].y).addEventListener('change', function () { updateDays(p); timePreview(); });
+    $(DT[p].m).addEventListener('change', function () { updateDays(p); timePreview(); });
+    $(DT[p].d).addEventListener('change', timePreview);
+    $(DT[p].h).addEventListener('change', timePreview);
+    $(DT[p].i).addEventListener('change', timePreview);
+  });
+
+  $('btnSaveLic').addEventListener('click', function () {
+    if (!licTargetId) return;
+    var res = R.setLicense(licTargetId, {
+      useTime: $('chipTime').classList.contains('on-time'),
+      startAt: tsFrom('s'),
+      expiryAt: tsFrom('e'),
+      useCount: $('chipCount').classList.contains('on-count'),
+      openLimit: $('licLimit').value
+    });
+    if (!res.ok) { showAlert(res.error, 'error'); return; }
+    closeLicForm(); renderLicenses();
+    if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+    showAlert('مجوز ذخیره و شمارنده باز شدن صفر شد (شارژ مجدد).');
+  });
+
+  $('licBody').addEventListener('click', function (e) {
+    var bc = e.target.closest('[data-charge]');
+    if (bc) {
+      var u = R.users().filter(function (x) { return x.id === bc.dataset.charge; })[0];
+      if (u) openLicForm(u);
+      return;
+    }
+    var blk = e.target.closest('[data-lock]');
+    if (blk) {
+      var ul = R.users().filter(function (x) { return x.id === blk.dataset.lock; })[0];
+      if (!ul) return;
+      var cur = R.licenseOf(ul.id).manualLock;
+      if (!cur && !window.confirm('دسترسی حساب «' + ul.username + '» به‌طور کامل قفل شود؟')) return;
+      R.setManualLock(ul.id, !cur);
+      renderLicenses();
+      if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+      showAlert(cur ? 'قفل حساب «' + ul.username + '» برداشته شد.' : 'حساب «' + ul.username + '» قفل شد.');
+    }
+  });
+
+  /* ══════════════ بخش ۴: ایجاد گروهی ══════════════ */
+  var bulkFileData = null; /* {name, rows:[[...]]} */
+
+  function colIndex(headers, names) {
+    for (var i = 0; i < headers.length; i++) {
+      var h = String(headers[i] || '').trim().toLowerCase();
+      for (var j = 0; j < names.length; j++) {
+        if (h === names[j] || h.indexOf(names[j]) !== -1) return i;
+      }
+    }
+    return -1;
+  }
+  function parseBulkRows(mat) { /* mat: آرایهٔ آرایهٔ سلول‌ها → [{username, pass, fullName}] */
+    if (!mat || !mat.length) return [];
+    var first = (mat[0] || []).map(function (c) { return String(c || '').trim(); });
+    var hasHeader = first.some(function (c) {
+      return /نام کاربری|username|رمز|گذرواژه|password|نام و نام خانوادگی|fullname|شناسه/i.test(c);
+    });
+    var iu = -1, ip = -1, iname = -1;
+    if (hasHeader) {
+      iu = colIndex(first, ['نام کاربری', 'username', 'شناسه']);
+      ip = colIndex(first, ['رمز', 'گذرواژه', 'password', 'pass']);
+      iname = colIndex(first, ['نام و نام خانوادگی', 'نام', 'fullname', 'name']);
+      mat = mat.slice(1);
+      if (iu === -1) iu = 0;
+      if (ip === -1) ip = 1;
+    } else { iu = 0; ip = 1; iname = 2; }
+    var out = [];
+    mat.forEach(function (row, idx) {
+      if (!row || !row.length) return;
+      var username = String(row[iu] == null ? '' : row[iu]).trim();
+      var pass = String(row[ip] == null ? '' : row[ip]).trim();
+      var fullName = iname >= 0 && row[iname] != null ? String(row[iname]).trim() : '';
+      if (!username && !pass) return; /* سطر خالی */
+      out.push({ row: hasHeader ? idx + 2 : idx + 1, username: username, pass: pass, fullName: fullName });
+    });
+    return out;
+  }
+  function bulkTargets() {
+    if (bulkFileData) return parseBulkRows(bulkFileData.rows);
+    var lines = String($('bulkText').value || '').split(/\r?\n/);
+    return parseBulkRows(lines.map(function (ln) { return ln.split(','); }));
+  }
+
+  $('bulkFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    if (!f) { bulkFileData = null; $('bulkFileInfo').textContent = ''; return; }
+    var lower = f.name.toLowerCase();
+    if (!/\.(xlsx|xls)$/.test(lower)) {
+      showAlert('قالب فایل نامعتبر است — فقط xlsx یا xls پذیرفته می‌شود.', 'error');
+      this.value = ''; bulkFileData = null; $('bulkFileInfo').textContent = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      try {
+        var wb = XLSXg.read(new Uint8Array(ev.target.result), { type: 'array' });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+        var mat = XLSXg.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+        bulkFileData = { name: f.name, rows: mat };
+        $('bulkFileInfo').textContent = '✅ «' + f.name + '» آماده است — ' + faNum(Math.max(0, mat.length - 1)) + ' سطر (شیت: ' + wb.SheetNames[0] + ')';
+        $('bulkText').value = '';
+      } catch (e) {
+        bulkFileData = null;
+        showAlert('خواندن فایل اکسل ناموفق بود.', 'error');
+      }
+    };
+    reader.readAsArrayBuffer(f);
+  });
+
+  $('btnBulkTpl').addEventListener('click', function () {
+    try {
+      var ws = XLSXg.utils.aoa_to_sheet([
+        ['نام کاربری', 'رمز', 'نام و نام خانوادگی'],
+        ['user1', '123456', 'علی محمدی'],
+        ['user2', '123456', 'زهرا احمدی']
+      ]);
+      var wb = XLSXg.utils.book_new();
+      XLSXg.utils.book_append_sheet(wb, ws, 'کاربران');
+      XLSXg.writeFile(wb, 'bulk-users-template.xlsx');
+    } catch (e) { showAlert('ساخت قالب ممکن نشد.', 'error'); }
+  });
+
+  $('btnBulkGo').addEventListener('click', function () {
+    var targets = bulkTargets();
+    var managerId = $('bulkManager').value;
+    if (!targets.length) { showAlert('کاربری برای ایجاد یافت نشد — متن یا فایل را کامل کنید.', 'error'); return; }
+    var created = 0, failed = [];
+    targets.forEach(function (t) {
+      var res = R.addUser({ username: t.username, pass: t.pass, fullName: t.fullName, role: 'USER', managerId: managerId });
+      if (res.ok) created++;
+      else failed.push({ row: t.row, username: t.username || '—', error: res.error });
+    });
+    $('bulkResult').classList.remove('hidden');
+    $('bulkResultTitle').textContent = '✅ ' + faNum(created) + ' کاربر از ' + faNum(targets.length) + ' سطر ایجاد شد' +
+      (failed.length ? ' — ' + faNum(failed.length) + ' سطر ناموفق بود.' : ' — همهٔ سطرها موفق بودند.');
+    $('bulkFailWrap').classList.toggle('hidden', !failed.length);
+    $('bulkFailBody').innerHTML = failed.map(function (f) {
+      return '<tr><td class="c">' + faNum(f.row) + '</td><td><span class="mono">' + esc(f.username) + '</span></td><td>' + esc(f.error) + '</td></tr>';
+    }).join('');
+    renderUsers(); renderLicenses();
+    if (window.NemaCloud.autoPush) window.NemaCloud.autoPush();
+    showAlert(faNum(created) + ' کاربر جدید ایجاد شد.');
+  });
+
+  /* ══════════════ بخش ۶: ابر و پشتیبان — فقط حساب اصلی ══════════════ */
+
+  function cloudStatus(msg, isErr) {
+    var el = $('cloudStatus');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.style.color = isErr ? 'var(--red, #b3261e)' : '';
+  }
+  function cloudSummaryLine() {
+    var NC = window.NemaCloud;
+    if (!NC.enabled()) return 'ابر متصل نیست — داده‌ها فقط در همین مرورگر ذخیره می‌شوند. برای ماندگاری در همهٔ دستگاه‌ها، ابر را راه‌اندازی کنید یا از «پشتیبان‌گیری کامل» استفاده کنید.';
+    var s = NC.lastSync();
+    return 'وضعیت: ابر متصل ✓ | آخرین همگام‌سازی: ' + (s.at ? new Date(s.at).toLocaleString('fa-IR') : '—') +
+           ' | نسخهٔ سرور: ' + faNum(s.version) +
+           (s.dirty ? ' | ⚠️ تغییرات محلیِ ارسال‌نشده دارید (با «ارسال به ابر» منتشر کنید)' : ' | بدون تغییر ارسال‌نشده');
+  }
+  function refreshCloudUI() {
+    var NC = window.NemaCloud;
+    var c = NC.cfg();
+    $('cloudBase').value = c.base || '';
+    $('cloudReadKey').value = c.readKey || '';
+    $('cloudAdminKey').value = c.adminKey || '';
+    cloudStatus(cloudSummaryLine(), NC.dirty());
+  }
+
+  $('btnCloudSave').addEventListener('click', function () {
+    window.NemaCloud.saveCfg({
+      base: $('cloudBase').value,
+      readKey: $('cloudReadKey').value,
+      adminKey: $('cloudAdminKey').value
+    });
+    refreshCloudUI();
+    showAlert('تنظیمات ابر ذخیره شد. برای انتشار تغییرات، «ارسال به ابر» را بزنید.');
+  });
+
+  $('btnCloudPull').addEventListener('click', function () {
+    var NC = window.NemaCloud;
+    if (!NC.enabled()) { cloudStatus('ابتدا نشانی سرور و کد اشتراک را وارد و ذخیره کنید.', true); return; }
+    if (NC.dirty() && !confirm('شما تغییرات محلیِ ارسال‌نشده دارید؛ بارگیری از ابر آن‌ها را بازنویسی می‌کند. ادامه می‌دهید؟')) return;
+    cloudStatus('در حال بارگیری از ابر…');
+    NC.pullState().then(function (r) {
+      if (!r.ok) { cloudStatus('بارگیری ناموفق: ' + (r.error || 'خطای نامشخص'), true); return; }
+      if (!r.data) { cloudStatus('سرور هنوز داده‌ای ندارد — ابتدا «ارسال به ابر» را بزنید.', true); return; }
+      NC.installState(r.data, r.version);
+      loadTickets(); renderRequests();
+      if (typeof renderUsers === 'function' && document.getElementById('tab-users')) { renderUsers(); renderLicenses(); }
+      refreshCloudUI();
+      showAlert('وضعیت تازه از ابر بارگیری شد (نسخهٔ ' + faNum(r.version) + ').');
+    });
+  });
+
+  /* نتیجهٔ «ارسال خودکار» (از cloud.js) — پیام وضعیت بدون مزاحمت */
+  window.NemaCloud._autoPushHandler = function (r) {
+    if (r && r.ok) {
+      $('btnCloudForce').classList.add('hidden');
+      cloudStatus('ابر متصل ✓ | آخرین تغییرات به‌صورت خودکار منتشر شد (نسخهٔ ' + faNum(r.version) + ').', false);
+    } else if (r && r.conflict) {
+      $('btnCloudForce').classList.remove('hidden');
+      cloudStatus('⚠️ نسخهٔ سرور (' + faNum(r.currentVersion) + ') تازه‌تر است؛ «بارگیری از ابر» یا «ارسال اجباری» را بزنید.', true);
+    }
+  };
+
+  function doPush(force) {
+    var NC = window.NemaCloud;
+    if (!NC.cfg().adminKey) { cloudStatus('برای نوشتن در ابر، «کلید مدیر» را وارد و ذخیره کنید.', true); return; }
+    cloudStatus(force ? 'در حال ارسال اجباری به ابر…' : 'در حال ارسال به ابر…');
+    NC.pushState(force).then(function (r) {
+      if (r.ok) {
+        $('btnCloudForce').classList.add('hidden');
+        refreshCloudUI();
+        showAlert('داده‌ها با موفقیت به ابر ارسال شد (نسخهٔ ' + faNum(r.version) + '). همهٔ دستگاه‌ها در ورود بعدی همین وضعیت را می‌گیرند.');
+      } else if (r.conflict) {
+        $('btnCloudForce').classList.remove('hidden');
+        cloudStatus('⚠️ نسخهٔ سرور (' + faNum(r.currentVersion) + ') تازه‌تر از نسخهٔ دیده‌شدهٔ شماست. اگر مطمئنید دادهٔ شما درست است، «ارسال اجباری» را بزنید؛ وگرنه اول «بارگیری از ابر» کنید.', true);
+      } else {
+        cloudStatus('ارسال ناموفق: ' + (r.error || 'خطای نامشخص'), true);
+      }
+    });
+  }
+  $('btnCloudPush').addEventListener('click', function () { doPush(false); });
+  $('btnCloudForce').addEventListener('click', function () {
+    if (confirm('دادهٔ سرور بازنویسی می‌شود. مطمئن هستید؟')) doPush(true);
+  });
+
+  $('btnCloudOff').addEventListener('click', function () {
+    if (!confirm('اتصال ابر قطع شود؟ داده‌های محلی حذف نمی‌شوند؛ فقط همگام‌سازی متوقف می‌شود.')) return;
+    window.NemaCloud.clearCfg();
+    $('btnCloudForce').classList.add('hidden');
+    refreshCloudUI();
+    showAlert('اتصال ابر قطع شد.');
+  });
+
+  /* ---------- پشتیبان‌گیری کامل ---------- */
+  $('btnBackupExport').addEventListener('click', function () {
+    var r = window.NemaCloud.exportBackup();
+    $('backupStatus').textContent = '✅ فایل پشتیبان ساخته شد و دانلود شد — زمان: ' + new Date().toLocaleString('fa-IR') +
+      ' | این فایل را در جایی امن نگه دارید.';
+    showAlert('پشتیبان کامل دریافت شد.');
+  });
+
+  $('btnBackupImport').addEventListener('click', function () { $('backupFile').click(); });
+  $('backupFile').addEventListener('change', function () {
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    if (!confirm('بازیابی، داده‌های فعلی همین مرورگر را با محتوای فایل پشتیبان جایگزین می‌کند. ادامه می‌دهید؟')) return;
+    window.NemaCloud.importBackup(f).then(function (r) {
+      if (!r.ok) { $('backupStatus').textContent = '❌ ' + (r.error || 'بازیابی ناموفق بود.'); return; }
+      var s = r.summary || {};
+      $('backupStatus').textContent = '✅ بازیابی انجام شد — کاربران: ' + faNum(s.users) + ' | درخواست‌ها: ' + faNum(s.tickets) +
+        ' | داده‌ها: ' + faNum(s.datasets) + ' | نقاط: ' + faNum(s.points) + ' — در حال بازخوانی صفحه…';
+      setTimeout(function () { location.reload(); }, 1200);
+    });
+  });
+
+  /* راه‌اندازی اولیهٔ بخش ابر و پشتیبان */
+  refreshCloudUI();
+  $('backupStatus').textContent = window.NemaCloud.lastBackupAt()
+    ? ('آخرین پشتیبان‌گیری: ' + new Date(window.NemaCloud.lastBackupAt()).toLocaleString('fa-IR'))
+    : 'تا این‌ها وقت پشتیبانی گرفته نشده است.';
+
+  /* دریافت بی‌سروصدا از ابر هنگام باز شدن پنل (اگر تغییر محلیِ ارسال‌نشده نباشد) */
+  if (window.NemaCloud.enabled() && !window.NemaCloud.dirty()) {
+    window.NemaCloud.pullState().then(function (r) {
+      if (r && r.ok && r.data) {
+        window.NemaCloud.installState(r.data, r.version);
+        loadTickets(); renderRequests();
+        renderUsers(); renderLicenses();
+        refreshCloudUI();
+      } else {
+        refreshCloudUI();
+      }
+    });
+  }
+
+  /* راه‌اندازی اولیهٔ بخش‌های ویژهٔ حساب اصلی (در همین بلوک — توابع بلابعقربه‌اند) */
+  initDateSelects();
+  renderUsers();
+  renderLicenses();
+
+  } /* پایان بخش‌های ویژهٔ حساب اصلی */
+
+  /* ══════════════ بخش ۵: داده‌ها ══════════════ */
+  var dataSel = {};
+  function dataSelIds() { return Object.keys(dataSel).filter(function (k) { return dataSel[k]; }); }
+
+  function renderData() {
+    var ds = R.datasets();
+    $('dataBody').innerHTML = ds.map(function (d) {
+      var picked = !!dataSel[d.id];
+      return '<tr' + (picked ? ' style="background:#fff5f5"' : '') + '>' +
+        '<td class="c"><input type="checkbox" data-dpick="' + esc(d.id) + '" ' + (picked ? 'checked' : '') + ' style="accent-color:var(--danger);cursor:pointer"/></td>' +
+        '<td>' + esc(d.name) + '</td>' +
+        '<td>' + esc(d.sheet || '—') + '</td>' +
+        '<td>' + esc(d.disease || '—') + '</td>' +
+        '<td class="c">' + faNum(d.rows) + '</td>' +
+        '<td class="c" style="color:var(--done);font-weight:700">' + faNum(d.valid) + '</td>' +
+        '<td class="c" style="color:var(--danger);font-weight:700">' + faNum(d.invalid) + '</td>' +
+        '<td class="c" style="font-size:11px">' + esc(faDate(d.ts)) + '</td>' +
+        '<td class="c"><button class="opbtn red" data-ddel="' + esc(d.id) + '">🗑 حذف</button></td>' +
+      '</tr>';
+    }).join('');
+    $('dataEmpty').classList.toggle('hidden', !!ds.length);
+    $('dataCount').textContent = 'داده‌های ثبت‌شده: ' + faNum(ds.length) + ' مورد';
+    var ids = dataSelIds();
+    $('btnDataBulkDel').classList.toggle('hidden', !ids.length);
+    $('btnDataSelNone').classList.toggle('hidden', !ids.length);
+    $('dataSelAll').checked = ds.length > 0 && ids.length === ds.length;
+  }
+
+  $('dataBody').addEventListener('change', function (e) {
+    var p = e.target.closest('[data-dpick]');
+    if (p) { dataSel[p.dataset.dpick] = p.checked; renderData(); }
+  });
+  $('dataBody').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ddel]');
+    if (!b) return;
+    if (!window.confirm('این داده از فهرست حذف شود؟')) return;
+    R.removeDatasets([b.dataset.ddel]);
+    delete dataSel[b.dataset.ddel];
+    renderData();
+    showAlert('داده حذف شد.');
+  });
+  $('dataSelAll').addEventListener('change', function () {
+    var self = this;
+    R.datasets().forEach(function (d) { dataSel[d.id] = self.checked; });
+    renderData();
+  });
+  $('btnDataSelNone').addEventListener('click', function () { dataSel = {}; renderData(); });
+  $('btnDataBulkDel').addEventListener('click', function () {
+    var ids = dataSelIds();
+    if (!ids.length) return;
+    if (!window.confirm('حذف گروهی ' + faNum(ids.length) + ' دادهٔ انتخاب‌شده؟')) return;
+    R.removeDatasets(ids);
+    dataSel = {};
+    renderData();
+    showAlert('داده‌های انتخاب‌شده حذف شدند.');
+  });
+  $('btnDataExport').addEventListener('click', function () {
+    var ds = R.datasets();
+    if (!ds.length) { showAlert('داده‌ای برای خروجی وجود ندارد.', 'error'); return; }
+    try {
+      var rows = ds.map(function (d) {
+        return { 'نام فایل': d.name, 'شیت': d.sheet, 'بیماری': d.disease, 'ردیف': d.rows,
+                 'معتبر': d.valid, 'نامعتبر': d.invalid, 'تاریخ ثبت': faDate(d.ts) };
+      });
+      var ws = XLSXg.utils.json_to_sheet(rows);
+      var wb = XLSXg.utils.book_new();
+      XLSXg.utils.book_append_sheet(wb, ws, 'داده‌ها');
+      XLSXg.writeFile(wb, 'datasets-log-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+    } catch (e) { showAlert('ساخت فایل اکسل ممکن نشد.', 'error'); }
+  });
+
+  /* ---------- دکمهٔ نصب برنامه (PWA) — فقط برای حساب اصلی admin ---------- */
+  (function initInstall() {
+    /* ثبت سرویس‌کار (پیش‌نیاز نصب PWA) — فقط در بستر امن */
+    if ('serviceWorker' in navigator &&
+        (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+      try { navigator.serviceWorker.register('sw.js').catch(function () {}); } catch (e) {}
+    }
+    var btn = $('btnInstall');
+    if (!btn) return;
+    /* فقط حساب اصلی admin دکمهٔ نصب را می‌بیند */
+    if (!(window.Auth && window.Auth.isPrimary && window.Auth.isPrimary())) return;
+    var deferred = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferred = e;
+      btn.classList.remove('hidden');
+    });
+    btn.addEventListener('click', function () {
+      if (!deferred) {
+        showAlert('برای نصب، از منوی مرورگر گزینهٔ «افزودن به صفحه اصلی / Install app» را انتخاب کنید.');
+        return;
+      }
+      deferred.prompt();
+      deferred.userChoice.then(function () { deferred = null; btn.classList.add('hidden'); });
+    });
+    window.addEventListener('appinstalled', function () {
+      deferred = null;
+      btn.classList.add('hidden');
+      showAlert('برنامه نصب شد؛ از صفحه اصلی دستگاه بازش کنید.');
+    });
+    /* اگر برنامه به‌صورت اپ مستقل اجرا شده باشد، دکمه لازم نیست */
+    try {
+      if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) return;
+    } catch (e) {}
+    /* اگر مرورگر رویداد نصب را نفرستاد، دکمه برای راهنمایی از مسیر منوی مرورگر نمایش داده می‌شود */
+    setTimeout(function () { btn.classList.remove('hidden'); }, 1200);
+  })();
+
+  /* ---------- خروج و راه‌اندازی ---------- */
+  $('btnLogout').addEventListener('click', function () {
+    window.Auth.logout();
+    location.replace('index.html');
+  });
+
+  loadTickets();
+  renderRequests();
+  renderData();
+})();
+</script>
+</body>
+</html>

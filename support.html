@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="ثبت درخواست و پشتیبانی — سامانه مدیریت منابع انسانی"/>
+<title>درخواست و پشتیبانی | سامانه مدیریت منابع انسانی</title>
+<link rel="icon" type="image/png" href="icons/icon-192.png"/>
+<link rel="stylesheet" href="css/fonts.css"/>
+<style>
+:root{
+  --navy:#10234e; --brand:#0e8a5f; --brand-dark:#0b6b49; --brand-soft:#e7f5ee;
+  --bg:#f3f6f4; --panel:#fff; --line:#e2e8e4; --ink:#1e2b26; --soft:#64766e;
+  --danger:#c0392b; --danger-soft:#fdeeec; --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Vazirmatn',Tahoma,sans-serif;font-size:14px;min-height:100vh;display:flex;flex-direction:column}
+.top{background:var(--navy);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(16,35,78,.25)}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:42px;height:42px;border-radius:12px;background:rgba(126,164,255,.18);border:1px solid rgba(126,164,255,.3);display:flex;align-items:center;justify-content:center;font-size:20px}
+.brand h1{font-size:16px;margin:0;line-height:1.7}
+.brand .sub{font-size:11.5px;color:#9fb4e8}
+.btn{font-family:inherit;font-size:12.5px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:filter .15s,background .15s}
+.btn:hover{filter:brightness(.97)}
+.btn.ghost-light{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#fff}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:800;font-size:14px;padding:11px;width:100%;justify-content:center}
+.btn.primary:hover{background:var(--brand-dark)}
+.wrap{width:100%;max-width:560px;margin:0 auto;padding:18px 16px 34px;flex:1}
+.contact-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px}
+.contact{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 8px;text-decoration:none;color:var(--ink);font-size:12px;font-weight:700;transition:border-color .15s}
+.contact small{font-weight:400;font-size:10.5px;color:var(--soft);direction:ltr}
+.contact:hover{border-color:var(--brand)}
+.contact.wa:hover{border-color:#25d366}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;box-shadow:0 1px 4px rgba(20,40,30,.05)}
+.card h2{font-size:15px;margin:0 0 4px}
+.card .desc{font-size:12px;color:var(--soft);margin:0 0 14px;line-height:2}
+label{display:block;font-size:12px;font-weight:700;color:var(--ink);margin:11px 0 5px}
+label:first-of-type{margin-top:0}
+.inp{width:100%;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+.inp:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,138,95,.12);outline:none}
+textarea.inp{resize:vertical;min-height:110px;line-height:2}
+.alert{border-radius:10px;padding:10px 13px;font-size:12.5px;margin:12px 0 2px}
+.alert.error{background:var(--danger-soft);border:1px solid #f0c4bd;color:var(--danger)}
+.form-foot{margin-top:14px}
+.okbox{text-align:center;padding:26px 18px}
+.ok-ic{width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:26px}
+.okbox h2{margin-bottom:8px}
+.okbox .code{font-size:15px;background:var(--brand-soft);border:1px dashed #bfe3d2;color:var(--brand-dark);border-radius:10px;padding:9px 14px;display:inline-block;margin:6px 0 10px}
+.okbox p{font-size:12.5px;color:var(--soft);line-height:2.1;margin:6px 0}
+.ok-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.ok-actions .btn.primary{width:auto;padding:9px 16px;font-size:12.5px}
+.hidden{display:none!important}
+.note{font-size:11px;color:var(--soft);line-height:2;margin:15px 4px 0;text-align:center}
+.credit{margin-top:14px;padding-top:11px;border-top:1px dashed var(--line);text-align:center;font-size:11px;color:var(--soft);line-height:2}
+/* نام کاربر جاری — چیپ ریز در سربرگ */
+.user-chip{font-size:11px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.contact-row{grid-template-columns:repeat(3,1fr);gap:6px}.contact{font-size:11px;padding:10px 4px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo">📮</span>
+    <div>
+      <h1>درخواست و پشتیبانی</h1>
+      <span class="sub">سامانه مدیریت منابع انسانی</span>
+    </div>
+  </div>
+  <div class="top-actions" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span id="userChip" class="user-chip" title="حساب کاربری جاری">👤 …</span>
+    <a class="btn ghost-light" href="index.html">→ بازگشت به برنامه</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="contact-row">
+    <a class="contact" href="tel:09163638297">📞 تماس<small>09163638297</small></a>
+    <a class="contact wa" href="https://wa.me/989163638297?text=%D8%B3%D9%84%D8%A7%D9%85%D8%8C%20%D8%AF%D8%B1%D8%AE%D9%88%D8%A7%D8%B3%D8%AA%20%D9%BE%D8%B4%D8%AA%DB%8C%D8%A8%D8%A7%D9%86%DB%8C%20%D8%AF%D8%A7%D8%B1%D9%85." target="_blank" rel="noopener">💬 واتساپ<small>پیام مستقیم</small></a>
+    <a class="contact" href="sms:09163638297">✉️ پیامک<small>09163638297</small></a>
+  </div>
+
+  <form id="frm" class="card" novalidate>
+    <h2>ثبت درخواست جدید</h2>
+    <p class="desc">فرم زیر را کامل کنید؛ درخواست در «پنل مدیریت» ثبت و با کد پیگیری قابل پیگیری می‌شود.</p>
+
+    <label for="fName">نام و نام خانوادگی <b style="color:var(--danger)">*</b></label>
+    <input id="fName" class="inp" autocomplete="name"/>
+
+    <label for="fPhone">شماره همراه (اختیاری)</label>
+    <input id="fPhone" class="inp" dir="ltr" inputmode="tel" placeholder="09xxxxxxxxx" style="text-align:left"/>
+
+    <label for="fSubject">موضوع درخواست <b style="color:var(--danger)">*</b></label>
+    <input id="fSubject" class="inp" placeholder="مثال: درخواست شارژ اعتبار / گزارش اشکال"/>
+
+    <label for="fMsg">شرح درخواست <b style="color:var(--danger)">*</b></label>
+    <textarea id="fMsg" class="inp" placeholder="مشکل یا درخواست خود را با جزئیات بنویسید…"></textarea>
+
+    <div id="err" class="alert error hidden"></div>
+
+    <div class="form-foot">
+      <button type="submit" class="btn primary">📮 ثبت درخواست</button>
+    </div>
+  </form>
+
+  <div id="ok" class="card okbox hidden">
+    <div class="ok-ic">✅</div>
+    <h2>درخواست شما ثبت شد</h2>
+    <p>کد پیگیری:</p>
+    <span class="code" id="okCode" dir="ltr"></span>
+    <p>درخواست در «🛡️ پنل مدیریت» (همین دستگاه/مرورگر) قابل مشاهده است.<span id="cloudHint" class="hidden" style="display:block;margin-top:6px;color:#1c7a43;font-weight:700"></span><br/>برای پیگیری فوری با پشتیبانی تماس بگیرید: <b dir="ltr">09163638297</b></p>
+    <div class="ok-actions">
+      <button id="btnCopy" class="btn">📋 کپی کد پیگیری</button>
+      <button id="btnAgain" class="btn primary">ثبت درخواست جدید</button>
+      <a class="btn" href="index.html">→ بازگشت به برنامه</a>
+    </div>
+  </div>
+
+  <p class="note">درخواست‌های این فرم در حافظهٔ همان مرورگری که پر شده ذخیره می‌شوند؛ و اگر «همگام‌سازی ابری» سامانه فعال باشد، به‌صورت خودکار به سرور نیز ارسال می‌شوند تا روی دستگاه مدیر سامانه دیده شوند. برای رسیدگی سریع‌تر، از راه‌های تماس مستقیم بالا نیز استفاده کنید.</p>
+
+  <p class="credit">تهیه،گسترش و پشتیبانی: سجاد بازوندی — همراه: <b dir="ltr">09163638297</b></p>
+</main>
+
+<script src="js/cloud.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var LS_KEY = 'nema.support.tickets.v1';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function toEn(s) {
+    return String(s || '')
+      .replace(/[۰-۹]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'.indexOf(d); })
+      .replace(/[٠-٩]/g, function (d) { return '٠١٢٣٤٥٦٧٨٩'.indexOf(d); })
+      .replace(/[\s\-()]/g, '');
+  }
+  function faNum(s) { return String(s).replace(/\d/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[Number(d)]; }); }
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function setErr(msg) {
+    var e = $('err');
+    if (!msg) { e.className = 'alert error hidden'; e.textContent = ''; return; }
+    e.textContent = msg;
+    e.className = 'alert error';
+  }
+
+  $('frm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var name = $('fName').value.trim();
+    var phone = toEn($('fPhone').value);
+    var subject = $('fSubject').value.trim();
+    var message = $('fMsg').value.trim();
+
+    if (!name) { setErr('نام و نام خانوادگی را وارد کنید.'); $('fName').focus(); return; }
+    if (phone && !/^09\d{9}$/.test(phone)) { setErr('شماره همراه معتبر نیست — باید ۱۱ رقم و با ۰۹ شروع شود (مثال: 09123456789).'); $('fPhone').focus(); return; }
+    if (!subject) { setErr('موضوع درخواست را بنویسید.'); $('fSubject').focus(); return; }
+    if (message.length < 5) { setErr('شرح درخواست را کامل‌تر بنویسید.'); $('fMsg').focus(); return; }
+
+    var id = Date.now();
+    var ticket = {
+      id: id,
+      code: 'NM-' + String(id).slice(-5),
+      name: name, phone: phone, subject: subject, message: message,
+      sender: (window.Auth && window.Auth.isAuthenticated() && window.Auth.sessionUser()) || '',
+      status: 'new', ts: id
+    };
+
+    var arr = [];
+    try { arr = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { arr = []; }
+    if (!Array.isArray(arr)) arr = [];
+    arr.push(ticket);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(arr)); }
+    catch (e) { setErr('ذخیره‌سازی ممکن نشد (حافظهٔ مرورگر پر است). لطفاً مستقیماً تماس بگیرید: 09163638297'); return; }
+
+    /* اگر «همگام‌سازی ابری» فعال باشد، درخواست مستقیماً به سرور هم می‌رود
+       تا در پنل مدیریت روی دستگاه admin (هر دستگاهی) دیده شود. */
+    if (window.NemaCloud && window.NemaCloud.enabled()) {
+      try {
+        window.NemaCloud.postTicket(ticket).then(function (r) {
+          if (r && r.ok) {
+            var hint = document.getElementById('cloudHint');
+            if (hint) { hint.textContent = '✅ درخواست شما به سرور سامانه نیز ارسال شد.'; hint.classList.remove('hidden'); }
+          }
+        });
+      } catch (e) { /* ارسال ابی حیاتی نیست */ }
+    }
+
+    $('okCode').textContent = ticket.code;
+    $('frm').classList.add('hidden');
+    $('ok').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  $('btnAgain').addEventListener('click', function () {
+    $('frm').reset();
+    setErr('');
+    $('ok').classList.add('hidden');
+    $('frm').classList.remove('hidden');
+    $('fName').focus();
+  });
+
+  $('btnCopy').addEventListener('click', function () {
+    var code = $('okCode').textContent;
+    var done = function () {
+      this.textContent = '✅ کپی شد';
+      var b = this;
+      setTimeout(function () { b.textContent = '📋 کپی کد پیگیری'; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(code).then(done.bind($('btnCopy')), function () {});
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); done.call($('btnCopy')); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+
+  /* پیش‌پرکردن نام فرستنده از نشست فعلی (مطابق کیت) — کاملاً محافظت‌شده */
+  try {
+    if (window.Auth && typeof window.Auth.sessionUser === 'function' &&
+        window.Auth.isAuthenticated() && window.Auth.sessionUser()) {
+      $('fName').value = window.Auth.sessionUser();
+    }
+  } catch (e) { /* پیش‌پرکردن حیاتی نیست */ }
+
+  /* نام کاربر جاری — چیپ ریز سربرگ */
+  try {
+    var _uc = document.getElementById('userChip');
+    if (_uc && window.Auth && typeof window.Auth.sessionUser === 'function' && window.Auth.isAuthenticated()) {
+      var _su = window.Auth.sessionUser();
+      _uc.textContent = '👤 ' + (_su || '—');
+      _uc.title = 'حساب کاربری جاری' + (_su ? ': ' + _su : '');
+    }
+  } catch (e) { /* نمایش نام حیاتی نیست */ }
+})();
+</script>
+</body>
+</html>

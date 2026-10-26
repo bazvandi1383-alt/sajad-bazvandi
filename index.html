@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="سامانه مدیریت منابع انسانی — ثبت، پایش و تحلیل پرسنل پایگاه‌های بهداشت نشان؛ آنلاین و آفلاین"/>
+<meta name="theme-color" content="#10234e"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" type="image/png" href="icons/icon-192.png"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<title>سامانه مدیریت منابع انسانی | ثبت و پایش پرسنل پایگاه‌های بهداشت</title>
+
+<!-- اعمال تم ذخیره‌شده (تاریک/روشن) قبل از بارگیری استایل — بدون پرش رنگ -->
+<script>try{if(localStorage.getItem('neshanExcelMap.theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<!-- فونت محلی وزیرمتن (برای کارکرد کامل آفلاین) -->
+<link rel="stylesheet" href="css/fonts.css"/>
+<!-- Leaflet محلی -->
+<link rel="stylesheet" href="lib/leaflet/leaflet.css"/>
+<!-- استایل برنامه -->
+<link rel="stylesheet" href="css/style.css"/>
+
+<!-- کتابخانه محلی Leaflet -->
+<script src="lib/leaflet/leaflet.js"></script>
+<!-- نقشه حرارتی (محلی) -->
+<script src="lib/heat/leaflet-heat.js"></script>
+<script>
+/* نگه‌داری افزونهٔ محلی نقشه حرارتی — SDK نشان در ادامه L سراسری را بازنویسی می‌کند
+   و باید افزونه بعداً به L تازه دوباره وصل شود (در layers.js انجام می‌شود).
+   خوشه‌بندی نشانگرها افزونه لازم ندارد (پیاده‌سازی داخلی در layers.js). */
+window.__leafletPlugins = (function (L) {
+  return L ? {
+    heatLayer: L.heatLayer,
+    HeatLayer: L.HeatLayer
+  } : {};
+})(window.L);
+</script>
+<!-- کتابخانه محلی خواندن اکسل (SheetJS) -->
+<script src="lib/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<!-- ================= درگاه ورود (تم سرمه‌ای) ================= -->
+<div id="loginGate" class="login-gate hidden">
+  <div class="login-card">
+    <div class="login-icon">🛡️</div>
+    <h1>سامانه مدیریت منابع انسانی</h1>
+    <form id="loginForm" novalidate>
+      <label class="field-label" for="loginUser">نام کاربری</label>
+      <input id="loginUser" class="input" autocomplete="username" spellcheck="false"/>
+      <label class="field-label" for="loginPass">گذرواژه</label>
+      <div class="pass-wrap">
+        <input id="loginPass" type="password" class="input" autocomplete="current-password"/>
+        <button type="button" id="btnEye" class="eye-btn" aria-label="نمایش گذرواژه">👁</button>
+      </div>
+      <label class="check-row"><input type="checkbox" id="loginRemember"/> مرا به خاطر بسپار (۳۰ روز)</label>
+      <div id="loginError" class="login-error hidden"></div>
+      <button type="submit" id="btnLogin" class="primary-btn login-btn">ورود</button>
+    </form>
+    <div class="login-credit">
+      <span>تهیه،گسترش و پشتیبانی: سجاد بازوندی</span>
+      <span dir="ltr">همراه: 09163638297</span>
+    </div>
+  </div>
+</div>
+
+<header class="app-header no-print">
+  <div class="header-right">
+    <button id="btnSidebar" class="icon-btn" title="نمایش/پنهان‌سازی پنل" aria-label="نمایش یا پنهان‌سازی پنل">☰</button>
+    <div class="brand">
+      <span class="brand-icon">🗺️</span>
+      <div>
+        <h1>سامانه مدیریت منابع انسانی</h1>
+        <span class="brand-sub">ثبت، پایش و تحلیل پرسنل پایگاه‌های بهداشت — آنلاین و آفلاین</span>
+      </div>
+    </div>
+  </div>
+  <div class="header-left">
+    <span id="netStatus" class="status-chip status-online" title="وضعیت شبکه">● در حال بررسی…</span>
+    <button id="btnDark" class="ghost-btn" title="حالت تاریک / روشن">🌙</button>
+    <button id="btnHelp" class="ghost-btn" title="راهنمای استفاده">؟ راهنما</button>
+    <span id="userChip" class="user-chip" title="حساب کاربری جاری">👤 …</span>
+    <button id="btnLogout" class="ghost-btn" title="خروج از حساب کاربری">🚪 خروج</button>
+  </div>
+</header>
+
+<!-- نوار بخش‌ها در موبایل — همیشه نمایان زیر سربرگ (تب‌های پنل در صفحه‌های کوچک جمع می‌شوند) -->
+<nav class="mobile-tabs no-print" id="mobileTabs" role="tablist" aria-label="بخش‌های برنامه">
+  <button class="mtab active" data-tab="points" role="tab" aria-selected="true">📁 نقاط</button>
+  <button class="mtab" data-tab="stats" role="tab" aria-selected="false">📊 آمار</button>
+  <button class="mtab" data-tab="mapset" role="tab" aria-selected="false">🗺️ نقشه</button>
+  <button class="mtab" data-tab="offline" role="tab" aria-selected="false">📦 آفلاین</button>
+</nav>
+
+<main class="app-main no-print">
+  <!-- ================= پنل کناری ================= -->
+  <aside id="sidebar" class="sidebar">
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="points" role="tab" aria-selected="true">📁 نقاط</button>
+      <button class="tab" data-tab="stats" role="tab" aria-selected="false">📊 آمار</button>
+      <button class="tab" data-tab="mapset" role="tab" aria-selected="false">🗺️ نقشه</button>
+      <button class="tab" data-tab="offline" role="tab" aria-selected="false">📦 آفلاین</button>
+    </nav>
+
+    <!-- ---------- تب نقاط ---------- -->
+    <section id="tab-points" class="tab-panel active">
+      <div class="upload-zone" id="dropZone" tabindex="0" role="button" aria-label="انتخاب فایل اکسل" title="فایل اکسل را اینجا رها کنید یا کلیک کنید">
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" hidden/>
+        <span class="upload-icon">📄</span>
+        <p class="upload-title">دریافت فایل اکسل</p>
+      </div>
+
+      <div class="row-actions">
+        <button id="btnTemplate" class="ghost-btn sm" title="ساخت فایل نمونه اکسل">⬇️ دریافت قالب نمونه</button>
+        <button id="btnClear" class="ghost-btn sm danger" title="حذف همه نقاط">🗑️ پاک‌سازی نقاط</button>
+      </div>
+
+      <div id="statsBar" class="stats-bar" hidden>
+        <span class="stat ok"><b id="statValid">0</b> معتبر</span>
+        <span class="stat dup"><b id="statDup">0</b> تکراری</span>
+        <span class="stat bad"><b id="statBad">0</b> نامعتبر</span>
+        <span class="stat all"><b id="statAll">0</b> کل</span>
+      </div>
+
+      <div id="filterBar" class="filter-bar" hidden>
+        <div class="filter-head">
+          <span class="filter-title">🔎 دسته‌بندی و فیلتر</span>
+          <span id="filterCount" class="filter-count"></span>
+        </div>
+        <div class="filter-grid">
+          <div class="filter-cell">
+            <label class="filter-label" for="fltCenter">مرکز</label>
+            <select id="fltCenter" class="select filter-select"><option value="">همه</option></select>
+          </div>
+          <div class="filter-cell">
+            <label class="filter-label" for="fltBase">پایگاه</label>
+            <select id="fltBase" class="select filter-select"><option value="">همه</option></select>
+          </div>
+          <div class="filter-cell">
+            <label class="filter-label" for="fltHouse">خانه بهداشت</label>
+            <select id="fltHouse" class="select filter-select"><option value="">همه</option></select>
+          </div>
+          <div class="filter-cell">
+            <label class="filter-label" for="fltPop">جمعیت</label>
+            <select id="fltPop" class="select filter-select">
+              <option value="">همه</option>
+              <option value="0-500">کمتر از ۵۰۰</option>
+              <option value="500-1000">۵۰۰ تا ۱٬۰۰۰</option>
+              <option value="1000-2000">۱٬۰۰۰ تا ۲٬۰۰۰</option>
+              <option value="2000-5000">۲٬۰۰۰ تا ۵٬۰۰۰</option>
+              <option value="5000+">بیشتر از ۵٬۰۰۰</option>
+            </select>
+          </div>
+        </div>
+        <div class="row-actions">
+          <button id="btnClearFilters" class="ghost-btn sm">✖️ حذف فیلترها</button>
+        </div>
+      </div>
+
+      <div id="remindersBox" class="reminders" hidden>
+        <div class="rem-head">
+          <span class="rem-title">⏰ هشدار تاریخ پیگیری</span>
+          <span id="remCount" class="rem-count"></span>
+        </div>
+        <p class="rem-sub">مواردی که موعد پیگیری آن‌ها گذشته یا تا ۷ روز آینده است — با کلیک، روی نقشه باز می‌شود:</p>
+        <div id="remList" class="rem-list"></div>
+      </div>
+
+      <div id="pointsAlert" class="alert hidden"></div>
+
+      <div class="points-list-wrap">
+        <table class="points-table" id="pointsTable">
+          <thead>
+            <tr><th>#</th><th>پایگاه / خانه بهداشت</th><th>مرکز</th><th>جمعیت</th><th></th></tr>
+          </thead>
+          <tbody id="pointsBody"></tbody>
+        </table>
+        <p id="emptyPoints" class="empty-note">هنوز رکوردی بارگذاری نشده است. پس از بارگذاری فایل، رکوردها (در صورت داشتن مختصات) روی نقشه هم رسم می‌شوند.</p>
+      </div>
+
+      <div class="row-actions">
+        <button id="btnFit" class="primary-btn sm" disabled>🎯 زوم روی نقاط</button>
+        <button id="btnExportGeo" class="ghost-btn sm" disabled>⬇️ GeoJSON</button>
+        <button id="btnExportCsv" class="ghost-btn sm" disabled>⬇️ CSV</button>
+      </div>
+    </section>
+
+    <!-- ---------- تب آمار ---------- -->
+    <section id="tab-stats" class="tab-panel">
+      <div class="kpi-grid">
+        <div class="kpi"><b id="kpiTotal">۰</b><span>تعداد رکوردها</span></div>
+        <div class="kpi"><b id="kpiShown">۰</b><span>نمایش‌داده‌شده</span></div>
+        <div class="kpi"><b id="kpiDiseases">۰</b><span>تعداد مراکز</span></div>
+        <div class="kpi"><b id="kpiBases">۰</b><span>تعداد پایگاه‌ها</span></div>
+        <div class="kpi"><b id="kpiHouses">۰</b><span>تعداد خانه‌های بهداشت</span></div>
+        <div class="kpi"><b id="kpiPop">۰</b><span>کل جمعیت تحت پوشش</span></div>
+        <div class="kpi"><b id="kpiPopUnder5">۰</b><span>جمعیت زیر ۵ سال</span></div>
+        <div class="kpi"><b id="kpiCaregiverCount">۰</b><span>کل مراقبان سلامت</span></div>
+        <div class="kpi hidden" id="kpiAgeCard"><b id="kpiAge">—</b><span>میانگین سن (تقریبی)</span></div>
+        <div class="kpi hidden" id="kpiGenderCard"><b id="kpiGender">—</b><span>جنسیت (م/ز)</span></div>
+        <div class="kpi kpi-warn hidden" id="kpiFollowupCard" role="button" tabindex="0" title="رفتن به هشدارهای پیگیری در تب نقاط"><b id="kpiFollowup">—</b><span>موعد پیگیری گذشته/امروز</span></div>
+        <div class="kpi kpi-bad hidden" id="kpiNinCard" title="کدملی‌هایی که رقم کنترل آن‌ها صحیح نیست"><b id="kpiNin">—</b><span>کدملی نامعتبر</span></div>
+      </div>
+      <p class="hint">نمودارهای زیر با فیلترهای تب «نقاط» به‌روزرسانی می‌شوند. با کلیک روی هر ردیف، همان دسته فیلتر می‌شود (کلیک دوباره = حذف فیلتر).</p>
+
+      <div id="statsBody">
+        <div class="bar-group" hidden>
+          <h4 class="bar-title">🏥 دسته‌بندی بر اساس مرکز</h4>
+          <div id="barCenter"></div>
+        </div>
+        <div class="bar-group" hidden>
+          <h4 class="bar-title">🏠 دسته‌بندی بر اساس خانه بهداشت</h4>
+          <div id="barHouse"></div>
+        </div>
+        <div class="bar-group" hidden>
+          <h4 class="bar-title">🏢 دسته‌بندی بر اساس پایگاه</h4>
+          <div id="barBase"></div>
+        </div>
+        <div class="bar-group" hidden id="trendGroup">
+          <h4 class="bar-title">👥 توزیع جمعیت تحت پوشش بر اساس مرکز</h4>
+          <div id="trendChart"></div>
+          <p class="hint">کلیک روی هر میله = فیلتر همان مرکز (کلیک دوباره = حذف فیلتر).</p>
+        </div>
+      </div>
+      <p id="statsEmpty" class="empty-note">هنوز داده‌ای برای نمایش آمار وجود ندارد — ابتدا فایل اکسل را در تب «نقاط» بارگذاری کنید.</p>
+
+      <div class="divider"></div>
+      <h3 class="panel-title">📄 گزارش‌گیری</h3>
+      <div class="row-actions">
+        <button id="btnExportXlsx" class="ghost-btn sm" title="خروجی اکسل فقط رکوردهای فیلترشده">⬇️ خروجی اکسل (فیلترشده)</button>
+        <button id="btnPrint" class="ghost-btn sm" title="چاپ گزارش پرسنل">🖨️ چاپ گزارش</button>
+      </div>
+      <p class="hint">«چاپ گزارش» جدول پرسنل فیلترشده همراه با تاریخ و دامنه فیلتر را برای تحویل به مقام بالاتر آماده می‌کند.</p>
+    </section>
+
+    <!-- ---------- تب نقشه ---------- -->
+    <section id="tab-mapset" class="tab-panel">
+      <label class="field-label">منبع نقشه</label>
+      <div class="seg" role="radiogroup" aria-label="منبع نقشه">
+        <button class="seg-btn active" data-source="neshan" role="radio" aria-checked="true">نشان (آنلاین)</button>
+        <button class="seg-btn" data-source="osm" role="radio" aria-checked="false">OSM (آنلاین)</button>
+        <button class="seg-btn" data-source="offline" role="radio" aria-checked="false">آفلاین</button>
+      </div>
+      <p id="sourceHint" class="hint"></p>
+
+      <div id="neshanStyleRow">
+        <label class="field-label" for="styleSelect">استایل نقشه نشان</label>
+        <select id="styleSelect" class="select">
+          <option value="dreamy">روزیک (Dreamy)</option>
+          <option value="standard">استاندارد</option>
+          <option value="standard-night">شب (Standard Night)</option>
+          <option value="gray">خاکستری</option>
+          <option value="pastel">پاستل</option>
+        </select>
+      </div>
+
+      <div id="offlineSrcRow" class="hidden">
+        <label class="field-label" for="offlineSrcSelect">منبع کاشی‌های ذخیره‌شده</label>
+        <select id="offlineSrcSelect" class="select">
+          <option value="auto">خودکار (هر چه موجود باشد)</option>
+          <option value="neshan">کاشی‌های نشان</option>
+          <option value="osm">کاشی‌های OSM</option>
+        </select>
+      </div>
+
+      <label class="check-row"><input type="checkbox" id="chkProvinces" checked/> نمایش مرز و نام استان‌ها (برداری)</label>
+      <label class="check-row"><input type="checkbox" id="chkCityLabels" checked/> نمایش نام شهرهای بزرگ (برداری)</label>
+      <label class="check-row"><input type="checkbox" id="chkNumbered" checked/> نمایش شماره نقاط روی نشانگرها</label>
+      <label class="check-row"><input type="checkbox" id="chkHeat"/> نقشه حرارتی تراکم بیماری (Heatmap)</label>
+      <label class="check-row"><input type="checkbox" id="chkCluster"/> خوشه‌بندی نشانگرها در زوم‌های پایین</label>
+
+      <div class="divider"></div>
+      <p class="hint">نکته: در حالت آفلاین، کاشی‌های ذخیره‌شده به‌همراه نقشه برداری استان‌های ایران همیشه در دسترس‌اند؛ حتی بدون اینترنت.</p>
+    </section>
+
+    <!-- ---------- تب آفلاین ---------- -->
+    <section id="tab-offline" class="tab-panel">
+      <h3 class="panel-title">📥 آماده‌سازی نقشه آفلاین</h3>
+      <p class="hint">وقتی اینترنت دارید، کاشی‌های نقشه را برای محدوده نقاط (یا نمای فعلی) ذخیره کنید تا در حالت قطع اینترنت، نقشه بدون مشکل نمایش داده شود.</p>
+
+      <div class="field-row">
+        <div>
+          <label class="field-label" for="zoomMin">کمینه زوم</label>
+          <input type="number" id="zoomMin" class="input" value="5" min="3" max="18"/>
+        </div>
+        <div>
+          <label class="field-label" for="zoomMax">بیشینه زوم</label>
+          <input type="number" id="zoomMax" class="input" value="14" min="3" max="18"/>
+        </div>
+      </div>
+
+      <div class="radio-group" role="radiogroup" aria-label="محدوده دانلود">
+        <label class="check-row"><input type="radio" name="dlArea" value="points" checked/> محدوده نقاط بارگذاری‌شده (با حاشیه)</label>
+        <label class="check-row"><input type="radio" name="dlArea" value="view"/> نمای فعلی نقشه</label>
+      </div>
+
+      <p id="dlEstimate" class="estimate">—</p>
+      <div class="row-actions">
+        <button id="btnEstimate" class="ghost-btn sm">محاسبه حجم تقریبی</button>
+        <button id="btnDownload" class="primary-btn sm">⬇️ شروع دانلود آفلاین</button>
+        <button id="btnCancelDl" class="ghost-btn sm danger hidden">⛔ لغو</button>
+      </div>
+
+      <div class="progress-wrap hidden" id="dlProgressWrap">
+        <div class="progress-bar"><div class="progress-fill" id="dlProgressFill"></div></div>
+        <p class="progress-text" id="dlProgressText">۰٪</p>
+      </div>
+
+      <div class="divider"></div>
+      <h3 class="panel-title">📦 وضعیت حافظه آفلاین</h3>
+      <div id="cacheInfo" class="cache-info">در حال شمارش…</div>
+      <div class="row-actions">
+        <button id="btnRefreshCache" class="ghost-btn sm">🔄 به‌روزرسانی</button>
+        <button id="btnClearCache" class="ghost-btn sm danger">🗑️ پاک‌کردن حافظه آفلاین</button>
+      </div>
+
+      <div class="divider"></div>
+      <h3 class="panel-title">🧪 شبیه‌سازی قطع اینترنت</h3>
+      <p class="hint">برای آزمودن حالت آفلاین بدون قطعکردن واقعی اینترنت، می‌توانید وضعیت را موقتاً آفلاین کنید.</p>
+      <label class="check-row"><input type="checkbox" id="chkSimulateOffline"/> شبیه‌سازی حالت آفلاین (کاشی‌های ذخیره‌شده همچنان کار می‌کنند)</label>
+    </section>
+
+    <!-- ---------- پیوندهای پنل مدیریت و پشتیبانی ---------- -->
+    <div class="panel-links">
+      <a href="admin.html" target="_top" class="panel-link admin" title="ورود به پنل مدیریت">🛡️ پنل مدیریت</a>
+      <a href="support.html" target="_top" class="panel-link support" title="ثبت درخواست و پشتیبانی">📮 درخواست و پشتیبانی</a>
+    </div>
+  </aside>
+
+  <!-- ================= نقشه ================= -->
+  <section class="map-side">
+    <div id="map" role="application" aria-label="نقشه نمایش نقاط"></div>
+    <div id="mapBanner" class="map-banner hidden"></div>
+    <div id="offlineBadge" class="offline-badge hidden">✈️ حالت آفلاین</div>
+  </section>
+</main>
+
+<!-- ================= پنجره راهنما ================= -->
+<div id="helpModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal-box">
+    <button class="modal-close" id="btnCloseHelp" aria-label="بستن">✕</button>
+    <h2 id="helpTitle">راهنمای سریع</h2>
+    <ol class="help-list">
+      <li><b>بارگذاری فایل:</b> در تب «نقاط» فایل اکسل (xlsx / xls / csv) را انتخاب کنید. ستون‌های «نام محل»، «عرض جغرافیایی» و «طول جغرافیایی» به‌صورت خودکار شناسایی می‌شوند؛ اگر سرستون‌ها شناسایی نشوند، ترتیب ستون ۱ تا ۳ ملاک است.</li>
+      <li><b>دسته‌بندی و فیلتر:</b> پس از بارگذاری، می‌توانید نقاط را بر اساس «نام بیماری»، «ماه تشخیص» و «نام پایگاه» فیلتر کنید؛ نقشه، جدول و خروجی‌ها فقط نقاط فیلترشده را نشان می‌دهند. تب «آمار» نیز همین دسته‌بندی را به‌صورت نمودار نشان می‌دهد.</li>
+      <li><b>آمار و گزارش:</b> در تب «📊 آمار»، تعداد موارد بر اساس بیماری/ماه/پایگاه به‌صورت نمودار نمایش داده می‌شود؛ «📈 روند زمانی» تغییرات ماهانه (مجموع و تفکیک هر بیماری) را به‌صورت نمودار خطی نشان می‌دهد. «خروجی اکسل» و «چاپ گزارش» نیز همان‌جاست.</li>
+      <li><b>رنگ دایره‌ها:</b> نشانگر هر نقطه یک دایره است. اگر ستون «رنگ بندی» (یا «کلیک کنید») کد رنگ (مانند <span dir="ltr">#E74C3C</span>، <span dir="ltr">rgb(231,76,60)</span> یا نام فارسی مثل «قرمز») یا سلول رنگی داشته باشد، همان رنگ دایره می‌شود؛ در غیر این صورت رنگ بر اساس دستهٔ بیماری/پایگاه تعیین می‌شود.</li>
+      <li><b>رسم روی نقشه:</b> نقاط معتبر بلافاصله روی نقشه رسم می‌شوند. با کلیک روی هر ردیفِ جدول، نقشه روی همان نقطه زوم می‌کند.</li>
+      <li><b>نقشه آنلاین:</b> به‌صورت پیش‌فرض نقشه نشان بارگیری می‌شود (کلید وب نشان داخل برنامه ذخیره است). اگر نقشه بارگیری نشد، روی دکمه «رفتن به OSM» در پیام روی نقشه بزنید یا در تب «نقشه» منبع را روی OSM بگذارید.</li>
+      <li><b>نقشه آفلاین:</b> وقتی اینترنت دارید، در تب «آفلاین» محدوده دلخواه را دانلود کنید. سپس در منبع نقشه گزینه «آفلاین» را انتخاب کنید؛ حتی بدون اینترنت، کاشی‌های ذخیره‌شده و نقشه برداری استان‌های ایران نمایش داده می‌شوند.</li>
+      <li><b>ذخیره‌سازی:</b> کاشی‌ها در حافظه مرورگر (IndexedDB) نگهداری می‌شوند و دفعه بعد هم بدون اینترنت در دسترس‌اند. فایل را باز نگه دارید تا داده‌ها پاک نشوند.</li>
+      <li><b>هشدار پیگیری:</b> اگر فایل ستون «تاریخ پیگیری» داشته باشد، مواردی که موعدشان گذشته یا تا ۷ روز آینده است در کادر «⏰ هشدار تاریخ پیگیری» بالا می‌آیند و نشانگرشان روی نقشه حلقه چشمک‌زن دارد.</li>
+      <li><b>کدملی:</b> ستون «کدملی» با الگوریتم رسمی رقم کنترل بررسی می‌شود؛ موارد نامعتبر با نشان 🪪 در پاپ‌آپ و شمارنده «کدملی نامعتبر» در تب آمار دیده می‌شوند.</li>
+      <li><b>نقشه حرارتی و خوشه‌بندی:</b> در تب «نقشه» می‌توانید «نقشه حرارتی تراکم» (تراکم موارد روی نقشه) و «خوشه‌بندی» (گروه‌شدن نقاط نزدیک به‌هم در زوم پایین) را روشن کنید.</li>
+      <li><b>نصب برنامه (PWA):</b> دکمه «📲 نصب برنامه» در سربرگ «پنل مدیریت» قرار دارد و فقط برای حساب اصلی admin نمایش داده می‌شود؛ همهٔ کاربران نیز می‌توانند از منوی مرورگر گزینه «افزودن به صفحه اصلی / Install app» را انتخاب کنند — برنامه مثل یک اپ مستقل نصب می‌شود و پوسته آن آفلاین هم باز می‌شود.</li>
+      <li><b>پنل مدیریت و پشتیبانی:</b> پیوندهای «🛡️ پنل مدیریت» و «📮 درخواست و پشتیبانی» در پایین پنل سمت چپ قرار دارند؛ پنل مدیریت با همان ورود برنامه باز می‌شود (نیازی به ورود دوم نیست) و درخواست‌های پشتیبانی همان‌جا قابل مشاهده است. بخش‌های «کاربران»، «مجوزها» و «ایجاد گروهی» فقط برای حساب اصلی admin دیده می‌شوند؛ سایر حساب‌ها فقط «درخواست‌ها» و «داده‌ها» را می‌بینند.</li>
+      <li><b>موبایل و اندروید:</b> در صفحه‌های کوچک، تنها یک ردیف تب‌های «نقاط / آمار / نقشه / آفلاین» — همیشه زیر سربرگ — دیده می‌شود و ردیف تکراری داخل پنل نمایش داده نمی‌شود؛ با لمس هر بخش، پنل مربوطه باز می‌شود. نام کاربر جاری نیز با فونت ریز کنار دکمهٔ «خروج» دیده می‌شود.</li>
+      <li><b>ماندگاری داده‌ها:</b> نقاط بارگذاری‌شده پس از بستن مرورگر/ریفرش هم می‌مانند (تا وقتی «پاک‌سازی نقاط» نزنید). در «پنل مدیریت ← ☁️ ابر و پشتیبان» می‌توانید از همهٔ داده‌ها «پشتیبان‌گیری کامل» بگیرید و در هر دستگاه دیگری «بازیابی» کنید؛ همچنین با راه‌اندازی یک‌بارهٔ «همگام‌سازی ابری» (Cloudflare رایگان — راهنمای داخل همان تب)، همهٔ حساب‌ها/مجوزها/درخواست‌ها روی سرور مشترک می‌شوند و روی همهٔ دستگاه‌ها یکسان دیده می‌شوند.</li>
+    </ol>
+    <p class="hint">راهنمای کامل: فایل <span dir="ltr">راهنمای_استفاده_انلاین_و_آفلاین_از_نقشه_نشان.md</span> در کنار برنامه.</p>
+  </div>
+</div>
+
+<!-- ================= گزارش چاپی ================= -->
+<div id="printReport" dir="rtl"></div>
+
+<!-- SDK وب نشان (آنلاین) — اگر اینترنت نباشد، برنامه بدون آن هم کار می‌کند -->
+<script src="https://static.neshan.org/sdk/leaflet/v1.9.4/neshan-sdk/v1.0.8/index.js" onerror="window.__neshanSdkFailed=true"></script>
+
+<!-- منطق برنامه -->
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/jdate.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/registry.js"></script>
+<script src="js/tilestore.js"></script>
+<script src="js/excel.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
