@@ -331,6 +331,158 @@
     return { ok: true };
   }
 
+  /* ---------- رکوردهای منابع انسانی (پرسنل پایگاه‌های بهداشت) ----------
+     ساختار هر رکورد مطابق excel.js است:
+     base, hh, center, caregiver, behvarz, observer, envExpert,
+     occExpert, doctor, dentist, services, reception,
+     popTotal, popUnder1, popUnder5, caregiverCount,
+     lat, lng, ts (تاریخ ثبت), id, deleted
+  */
+  var LS_HR = 'nema.hr.v1';
+  var MAX_HR = 5000;   /* سقف رکوردهای پرسنل */
+
+  function hrRecords() {
+    var v = readJSON(LS_HR, []);
+    return Array.isArray(v) ? v : [];
+  }
+  function hrActive() {
+    return hrRecords().filter(function (r) { return !r.deleted; });
+  }
+  function hrById(id) {
+    var arr = hrRecords();
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) return arr[i];
+    }
+    return null;
+  }
+  /* افزودن یا ویرایش یک رکورد پرسنل.
+     اگر id موجود باشد → ویرایش؛ در غیر این صورت → افزودن جدید. */
+  function saveHr(rec) {
+    if (!rec) return { ok: false, error: 'رکورد خالی است' };
+    var arr = hrRecords();
+    var now = Date.now();
+    var id = rec.id || ('hr' + now.toString(36) + Math.random().toString(36).slice(2, 6));
+    if (rec.id) {
+      var found = false;
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i].id === rec.id) {
+          arr[i] = Object.assign({}, arr[i], rec, { ts: arr[i].ts || now, updatedAt: now });
+          found = true;
+          break;
+        }
+      }
+      if (!found) return { ok: false, error: 'رکورد یافت نشد' };
+    } else {
+      arr.unshift({
+        id: id,
+        base: String(rec.base || ''),
+        hh: String(rec.hh || ''),
+        center: String(rec.center || ''),
+        caregiver: String(rec.caregiver || ''),
+        behvarz: String(rec.behvarz || ''),
+        observer: String(rec.observer || ''),
+        envExpert: String(rec.envExpert || ''),
+        occExpert: String(rec.occExpert || ''),
+        doctor: String(rec.doctor || ''),
+        dentist: String(rec.dentist || ''),
+        services: String(rec.services || ''),
+        reception: String(rec.reception || ''),
+        popTotal: Number(rec.popTotal) || 0,
+        popUnder1: Number(rec.popUnder1) || 0,
+        popUnder5: Number(rec.popUnder5) || 0,
+        caregiverCount: Number(rec.caregiverCount) || 0,
+        lat: rec.lat !== undefined ? rec.lat : null,
+        lng: rec.lng !== undefined ? rec.lng : null,
+        deleted: false,
+        ts: now
+      });
+      if (arr.length > MAX_HR) arr = arr.slice(0, MAX_HR);
+    }
+    writeJSON(LS_HR, arr);
+    return { ok: true, id: id };
+  }
+  /* حذف نرم (soft delete) — فقط پرچم deleted=true می‌گذارد */
+  function deleteHr(id) {
+    var arr = hrRecords();
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) {
+        arr[i].deleted = true;
+        arr[i].updatedAt = Date.now();
+        writeJSON(LS_HR, arr);
+        return { ok: true };
+      }
+    }
+    return { ok: false, error: 'رکورد یافت نشد' };
+  }
+  /* حذف گروهی (soft delete) */
+  function deleteHrBulk(ids) {
+    if (!Array.isArray(ids) || !ids.length) return { ok: false, error: 'هیچ آیدی داده نشده' };
+    var set = {};
+    ids.forEach(function (x) { set[String(x)] = 1; });
+    var arr = hrRecords();
+    var n = 0;
+    var now = Date.now();
+    arr.forEach(function (r) {
+      if (set[r.id] && !r.deleted) { r.deleted = true; r.updatedAt = now; n++; }
+    });
+    writeJSON(LS_HR, arr);
+    return { ok: true, count: n };
+  }
+  /* بازگرداندن رکورد حذف‌شده (undo) */
+  function restoreHr(id) {
+    var arr = hrRecords();
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) {
+        arr[i].deleted = false;
+        arr[i].updatedAt = Date.now();
+        writeJSON(LS_HR, arr);
+        return { ok: true };
+      }
+    }
+    return { ok: false, error: 'رکورد یافت نشد' };
+  }
+  /* حذف قطعی از حافظه (پاک‌سازی کامل) */
+  function purgeHr(ids) {
+    if (!Array.isArray(ids) || !ids.length) return { ok: false, error: 'هیچ آیدی داده نشده' };
+    var set = {};
+    ids.forEach(function (x) { set[String(x)] = 1; });
+    var arr = hrRecords().filter(function (r) { return !set[r.id]; });
+    writeJSON(LS_HR, arr);
+    return { ok: true };
+  }
+  /* حذف قطعی همهٔ رکوردهای حذف‌شده (پاک‌سازی سطل بازیافت) */
+  function emptyTrashHr() {
+    var arr = hrRecords().filter(function (r) { return !r.deleted; });
+    writeJSON(LS_HR, arr);
+    return { ok: true };
+  }
+  /* آمار کوتاه برای چیپ‌های پنل */
+  function hrStats() {
+    var arr = hrRecords();
+    var active = 0, deleted = 0, bases = {}, houses = {}, centers = {},
+        popTotal = 0, popUnder5 = 0, caregiverCount = 0;
+    arr.forEach(function (r) {
+      if (r.deleted) { deleted++; return; }
+      active++;
+      if (r.base) bases[r.base] = 1;
+      if (r.hh) houses[r.hh] = 1;
+      if (r.center) centers[r.center] = 1;
+      popTotal += Number(r.popTotal) || 0;
+      popUnder5 += Number(r.popUnder5) || 0;
+      caregiverCount += Number(r.caregiverCount) || 0;
+    });
+    return {
+      total: active,
+      deleted: deleted,
+      centers: Object.keys(centers).length,
+      bases: Object.keys(bases).length,
+      houses: Object.keys(houses).length,
+      popTotal: popTotal,
+      popUnder5: popUnder5,
+      caregiverCount: caregiverCount
+    };
+  }
+
   /* ---------- API عمومی ---------- */
   global.Registry = {
     ROLE_LABEL: ROLE_LABEL,
@@ -350,6 +502,17 @@
     countsByMid: countsByMid,
     datasets: datasets,
     addDataset: addDataset,
-    removeDatasets: removeDatasets
+    removeDatasets: removeDatasets,
+    /* API منابع انسانی */
+    hrRecords: hrRecords,
+    hrActive: hrActive,
+    hrById: hrById,
+    saveHr: saveHr,
+    deleteHr: deleteHr,
+    deleteHrBulk: deleteHrBulk,
+    restoreHr: restoreHr,
+    purgeHr: purgeHr,
+    emptyTrashHr: emptyTrashHr,
+    hrStats: hrStats
   };
 })(window);

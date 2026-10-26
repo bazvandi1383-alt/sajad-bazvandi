@@ -378,6 +378,29 @@
           });
         } catch (e) { /* ثبت داده حیاتی نیست */ }
       }
+      /* ثبت خودکار رکوردهای منابع انسانی در پنل مدیریت */
+      if (global.Registry && global.Registry.saveHr) {
+        try {
+          var _hrSaved = 0;
+          points.forEach(function (p) {
+            if (!p.valid || p.duplicate) return;
+            if (!p.base && !p.house && !p.center) return;
+            global.Registry.saveHr({
+              base: p.base || '', house: p.house || '', center: p.center || '',
+              caregiver: p.caregiver || '', behvarz: p.behvarz || '',
+              observer: p.observer || '', envExpert: p.envExpert || '',
+              occExpert: p.occExpert || '', doctor: p.doctor || '',
+              dentist: p.dentist || '', services: p.services || '',
+              reception: p.reception || '',
+              popTotal: p.popTotal || 0, popUnder1: p.popUnder1 || 0,
+              popUnder5: p.popUnder5 || 0, caregiverCount: p.caregiverCount || 0,
+              lat: p.lat, lng: p.lng
+            });
+            _hrSaved++;
+          });
+          if (_hrSaved) U.toast(_hrSaved + ' رکورد پرسنل در پنل مدیریت ثبت شد.', 'ok', 3500);
+        } catch (e) { /* ثبت پنل حیاتی نیست */ }
+      }
     }).catch(function (err) {
       showPointsAlert('error', 'خطا در پردازش فایل: ' + err.message);
       U.toast('پردازش فایل ناموفق بود.', 'error');
